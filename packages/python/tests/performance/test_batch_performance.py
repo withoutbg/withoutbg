@@ -59,7 +59,9 @@ class TestBatchPerformance:
 
         try:
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Measure batch processing time
                 start_time = time.time()
                 results = model.remove_background_batch(image_files)
@@ -95,7 +97,9 @@ class TestBatchPerformance:
 
         try:
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Measure batch processing time
                 start_time = time.time()
                 results = model.remove_background_batch(image_files)
@@ -125,7 +129,9 @@ class TestBatchPerformance:
 
         try:
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Measure batch processing time
                 start_time = time.time()
                 results = model.remove_background_batch(image_files)
@@ -160,7 +166,9 @@ class TestBatchPerformance:
 
             try:
                 model = WithoutBG.opensource()
-                with patch.object(model.model, "remove_background", side_effect=mock_processing):
+                with patch.object(
+                    model.model, "remove_background", side_effect=mock_processing
+                ):
                     # Measure batch processing
                     start_time = time.time()
                     results = model.remove_background_batch(image_files)
@@ -203,7 +211,9 @@ class TestBatchPerformance:
             gc.collect()
 
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Process batch and monitor memory
                 results = model.remove_background_batch(image_files)
 
@@ -230,7 +240,9 @@ class TestBatchPerformance:
         with tempfile.TemporaryDirectory() as output_dir:
             try:
                 model = WithoutBG.opensource()
-                with patch.object(model.model, "remove_background", side_effect=mock_processing):
+                with patch.object(
+                    model.model, "remove_background", side_effect=mock_processing
+                ):
                     # Measure batch processing with output directory
                     start_time = time.time()
                     results = model.remove_background_batch(
@@ -318,7 +330,9 @@ class TestBatchPerformance:
 
         try:
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Measure batch processing with mixed sizes
                 start_time = time.time()
                 results = model.remove_background_batch(image_files)
@@ -353,7 +367,9 @@ class TestBatchPerformance:
 
         try:
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Process the same batch multiple times
                 all_results = []
                 processing_times = []
@@ -396,7 +412,9 @@ class TestBatchPerformance:
         ]
 
         model = WithoutBG.opensource()
-        with patch.object(model.model, "remove_background", side_effect=mock_processing):
+        with patch.object(
+            model.model, "remove_background", side_effect=mock_processing
+        ):
             # Measure batch processing with PIL images
             start_time = time.time()
             results = model.remove_background_batch(test_images)
@@ -427,7 +445,9 @@ class TestBatchPerformance:
 
         try:
             model = WithoutBG.opensource()
-            with patch.object(model.model, "remove_background", side_effect=mock_processing):
+            with patch.object(
+                model.model, "remove_background", side_effect=mock_processing
+            ):
                 # Process batches sequentially (simulating concurrent workload)
                 total_start_time = time.time()
                 all_results = []
@@ -441,7 +461,7 @@ class TestBatchPerformance:
                     batch_time = end_time - start_time
 
                     print(
-                        f"Concurrent batch {i+1} ({len(batch)} images): "
+                        f"Concurrent batch {i + 1} ({len(batch)} images): "
                         f"{batch_time:.3f}s"
                     )
 

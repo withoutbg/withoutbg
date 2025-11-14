@@ -210,7 +210,9 @@ class TestCLIIntegration:
         assert output_path.exists()
 
     @patch("src.withoutbg.cli.WithoutBG")
-    def test_single_image_processing_pro_api(self, mock_withoutbg_class, test_image_file):
+    def test_single_image_processing_pro_api(
+        self, mock_withoutbg_class, test_image_file
+    ):
         """Test processing with withoutBG Pro API model."""
         result_image = Image.new("RGBA", (256, 256), color=(255, 0, 0, 128))
         mock_instance = mock_withoutbg_class.api.return_value
@@ -280,7 +282,9 @@ class TestCLIIntegration:
         assert default_output_dir.exists()
 
     @patch("src.withoutbg.cli.WithoutBG")
-    def test_output_format_options(self, mock_withoutbg_class, test_image_file, temp_dir):
+    def test_output_format_options(
+        self, mock_withoutbg_class, test_image_file, temp_dir
+    ):
         """Test different output format options."""
         result_image = Image.new("RGBA", (256, 256), color=(255, 0, 0, 128))
         mock_instance = mock_withoutbg_class.opensource.return_value
@@ -294,21 +298,23 @@ class TestCLIIntegration:
                 [str(test_image_file), "--output", str(output_path), "--format", fmt],
             )
 
-            assert (
-                result.exit_code == 0
-            ), f"Format {fmt} failed with output: {result.output}"
+            assert result.exit_code == 0, (
+                f"Format {fmt} failed with output: {result.output}"
+            )
             assert output_path.exists()
 
             # Verify the file was saved with correct PIL format
             saved_image = Image.open(output_path)
             expected_pil_formats = {"png": "PNG", "jpg": "JPEG", "webp": "WEBP"}
             expected_format = expected_pil_formats[fmt]
-            assert (
-                saved_image.format == expected_format
-            ), f"Expected {expected_format}, got {saved_image.format}"
+            assert saved_image.format == expected_format, (
+                f"Expected {expected_format}, got {saved_image.format}"
+            )
 
     @patch("src.withoutbg.cli.WithoutBG")
-    def test_jpeg_quality_setting(self, mock_withoutbg_class, test_image_file, temp_dir):
+    def test_jpeg_quality_setting(
+        self, mock_withoutbg_class, test_image_file, temp_dir
+    ):
         """Test JPEG quality setting."""
         result_image = Image.new("RGBA", (256, 256), color=(255, 0, 0, 128))
         mock_instance = mock_withoutbg_class.opensource.return_value
@@ -328,9 +334,9 @@ class TestCLIIntegration:
             ],
         )
 
-        assert (
-            result.exit_code == 0
-        ), f"JPEG quality test failed with output: {result.output}"
+        assert result.exit_code == 0, (
+            f"JPEG quality test failed with output: {result.output}"
+        )
         assert output_path.exists()
 
     @patch("src.withoutbg.cli.WithoutBG")
@@ -538,7 +544,9 @@ class TestCLIEdgeCases:
 
         with patch("src.withoutbg.cli.WithoutBG") as mock_withoutbg_class:
             mock_instance = mock_withoutbg_class.opensource.return_value
-            mock_instance.remove_background.side_effect = Exception("Cannot identify image file")
+            mock_instance.remove_background.side_effect = Exception(
+                "Cannot identify image file"
+            )
 
             result = self.runner.invoke(main, [str(corrupted_path)])
 
@@ -590,9 +598,9 @@ class TestCLIEdgeCases:
             main, [str(image_path), "--output", str(output_path), "--format", "jpg"]
         )
 
-        assert (
-            result.exit_code == 0
-        ), f"RGBA to JPG conversion failed with output: {result.output}"
+        assert result.exit_code == 0, (
+            f"RGBA to JPG conversion failed with output: {result.output}"
+        )
         assert output_path.exists()
 
         # Verify the saved image is RGB (not RGBA)
@@ -731,9 +739,9 @@ class TestCLIPerformance:
 
         # Performance assertion (should process 10 images in reasonable time)
         # This is quite lenient since we're mocking the actual processing
-        assert (
-            processing_time < 10.0
-        ), f"Batch processing took {processing_time:.2f}s, expected < 10s"
+        assert processing_time < 10.0, (
+            f"Batch processing took {processing_time:.2f}s, expected < 10s"
+        )
 
     @pytest.mark.performance
     @patch("src.withoutbg.cli.WithoutBG")
