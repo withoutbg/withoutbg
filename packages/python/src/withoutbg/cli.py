@@ -172,6 +172,7 @@ def _process_single(
 
     # Save result
     save_kwargs: dict[str, Any] = {}
+    original_result = result  # Keep reference to original for cleanup
     if format.lower() == "jpg":
         # Convert RGBA to RGB for JPEG
         if result.mode == "RGBA":
@@ -191,6 +192,12 @@ def _process_single(
         format=pil_format.get(format.lower(), format.upper()),
         **save_kwargs,
     )
+    
+    # Close the result image to ensure file handles are released on Windows
+    result.close()
+    # Also close the original if we created a new background
+    if result is not original_result:
+        original_result.close()
 
 
 def _process_batch(
@@ -244,6 +251,7 @@ def _process_batch(
 
                 # Save result
                 save_kwargs: dict[str, Any] = {}
+                original_result = result  # Keep reference to original for cleanup
                 if format.lower() == "jpg":
                     if result.mode == "RGBA":
                         background = Image.new("RGB", result.size, (255, 255, 255))
@@ -267,6 +275,12 @@ def _process_batch(
                     format=pil_format.get(format.lower(), format.upper()),
                     **save_kwargs,
                 )
+                
+                # Close the result image to ensure file handles are released on Windows
+                result.close()
+                # Also close the original if we created a new background
+                if result is not original_result:
+                    original_result.close()
 
             except Exception as e:
                 if verbose:

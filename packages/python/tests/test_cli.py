@@ -304,12 +304,12 @@ class TestCLIIntegration:
             assert output_path.exists()
 
             # Verify the file was saved with correct PIL format
-            saved_image = Image.open(output_path)
-            expected_pil_formats = {"png": "PNG", "jpg": "JPEG", "webp": "WEBP"}
-            expected_format = expected_pil_formats[fmt]
-            assert (
-                saved_image.format == expected_format
-            ), f"Expected {expected_format}, got {saved_image.format}"
+            with Image.open(output_path) as saved_image:
+                expected_pil_formats = {"png": "PNG", "jpg": "JPEG", "webp": "WEBP"}
+                expected_format = expected_pil_formats[fmt]
+                assert (
+                    saved_image.format == expected_format
+                ), f"Expected {expected_format}, got {saved_image.format}"
 
     @patch("src.withoutbg.cli.WithoutBG")
     def test_jpeg_quality_setting(
@@ -604,8 +604,8 @@ class TestCLIEdgeCases:
         assert output_path.exists()
 
         # Verify the saved image is RGB (not RGBA)
-        saved_image = Image.open(output_path)
-        assert saved_image.mode == "RGB"
+        with Image.open(output_path) as saved_image:
+            assert saved_image.mode == "RGB"
 
     def test_directory_as_input_without_batch_flag(self, temp_dir):
         """Test providing directory as input without --batch flag."""
@@ -650,9 +650,9 @@ class TestCLITestUtilities:
         assert image_path.exists()
 
         # Verify image properties
-        image = Image.open(image_path)
-        assert image.size == (100, 100)
-        assert image.mode == "RGB"
+        with Image.open(image_path) as image:
+            assert image.size == (100, 100)
+            assert image.mode == "RGB"
 
     def test_create_corrupted_file(self, temp_dir):
         """Test utility for creating corrupted image files."""
@@ -679,16 +679,15 @@ class TestCLITestUtilities:
             """Verify properties of output image file."""
             assert output_path.exists(), f"Output file {output_path} does not exist"
 
-            image = Image.open(output_path)
-
-            if expected_format:
-                assert image.format.lower() == expected_format.lower()
-            if expected_mode:
-                assert image.mode == expected_mode
-            if expected_size:
-                assert image.size == expected_size
-
-            return image
+            with Image.open(output_path) as image:
+                if expected_format:
+                    assert image.format.lower() == expected_format.lower()
+                if expected_mode:
+                    assert image.mode == expected_mode
+                if expected_size:
+                    assert image.size == expected_size
+                
+                return image.size  # Return size instead of image object
 
         # Create test output file
         test_image = Image.new("RGBA", (200, 150), color=(255, 0, 0, 128))
@@ -696,13 +695,13 @@ class TestCLITestUtilities:
         test_image.save(output_path)
 
         # Test verification
-        verified_image = verify_output_properties(
+        verified_size = verify_output_properties(
             output_path,
             expected_format="PNG",
             expected_mode="RGBA",
             expected_size=(200, 150),
         )
-        assert verified_image.size == (200, 150)
+        assert verified_size == (200, 150)
 
 
 class TestCLIPerformance:

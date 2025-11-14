@@ -39,12 +39,16 @@ class TestProAPI:
     @pytest.fixture
     def test_image(self, test_image_path):
         """Load test image."""
-        return Image.open(test_image_path)
+        img = Image.open(test_image_path)
+        yield img
+        img.close()
 
     @pytest.fixture
     def mock_alpha_image(self, mock_alpha_path):
         """Load mock alpha channel image."""
-        return Image.open(mock_alpha_path)
+        img = Image.open(mock_alpha_path)
+        yield img
+        img.close()
 
     def _create_mock_alpha_response(self, mock_alpha_image):
         """Create mock API response using real alpha channel image."""

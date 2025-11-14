@@ -74,8 +74,19 @@ def expected_outputs_dir(test_data_dir):
 @pytest.fixture
 def temp_dir():
     """Create a temporary directory for test outputs."""
+    import gc
+    import platform
+    import shutil
+    import time
+
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
+        
+        # Windows-specific cleanup: force garbage collection and wait briefly
+        # to ensure PIL releases file handles before cleanup
+        if platform.system() == "Windows":
+            gc.collect()
+            time.sleep(0.1)  # Small delay to allow file handles to be released
 
 
 @pytest.fixture

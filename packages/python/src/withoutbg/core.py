@@ -194,6 +194,7 @@ class WithoutBGOpenSource(WithoutBG):
 
             if output_path:
                 result.save(output_path)
+                # Note: Keep result in memory for return, don't close it yet
 
             results.append(result)
 
@@ -295,6 +296,7 @@ class WithoutBGAPI(WithoutBG):
 
             if output_path:
                 result.save(output_path)
+                # Note: Keep result in memory for return, don't close it yet
 
             results.append(result)
 

@@ -45,19 +45,17 @@ class TestCLIE2E:
         assert output_path.exists(), "Output file was not created"
 
         # Verify output image properties
-        output_image = Image.open(output_path)
-        original_image = Image.open(real_test_image_path)
+        with Image.open(output_path) as output_image, Image.open(real_test_image_path) as original_image:
+            assert output_image.mode == "RGBA", "Output should be RGBA"
+            assert (
+                output_image.size == original_image.size
+            ), "Output size should match input"
 
-        assert output_image.mode == "RGBA", "Output should be RGBA"
-        assert (
-            output_image.size == original_image.size
-        ), "Output size should match input"
-
-        # Check that alpha channel has variation (background was processed)
-        alpha_channel = output_image.split()[-1]
-        alpha_values = list(alpha_channel.getdata())
-        unique_alpha_values = set(alpha_values)
-        assert len(unique_alpha_values) > 1, "Alpha channel should have varying values"
+            # Check that alpha channel has variation (background was processed)
+            alpha_channel = output_image.split()[-1]
+            alpha_values = list(alpha_channel.getdata())
+            unique_alpha_values = set(alpha_values)
+            assert len(unique_alpha_values) > 1, "Alpha channel should have varying values"
 
     @pytest.mark.real_processing
     @pytest.mark.api
@@ -93,13 +91,11 @@ class TestCLIE2E:
         assert output_path.exists(), "Output file was not created"
 
         # Verify output image properties
-        output_image = Image.open(output_path)
-        original_image = Image.open(real_test_image_path)
-
-        assert output_image.mode == "RGBA", "Output should be RGBA"
-        assert (
-            output_image.size == original_image.size
-        ), "Output size should match input"
+        with Image.open(output_path) as output_image, Image.open(real_test_image_path) as original_image:
+            assert output_image.mode == "RGBA", "Output should be RGBA"
+            assert (
+                output_image.size == original_image.size
+            ), "Output size should match input"
 
     @pytest.mark.real_processing
     def test_e2e_batch_processing(self, test_images_dir, temp_output_dir):
@@ -141,8 +137,8 @@ class TestCLIE2E:
             ), f"Output file {expected_output} was not created"
 
             # Verify basic properties
-            output_image = Image.open(expected_output)
-            assert output_image.mode == "RGBA", "Batch output should be RGBA"
+            with Image.open(expected_output) as output_image:
+                assert output_image.mode == "RGBA", "Batch output should be RGBA"
 
     @pytest.mark.real_processing
     def test_e2e_different_output_formats(self, real_test_image_path, temp_output_dir):
@@ -174,22 +170,22 @@ class TestCLIE2E:
             assert output_path.exists(), f"Output file for {fmt} format was not created"
 
             # Verify format-specific properties
-            output_image = Image.open(output_path)
-            assert (
-                output_image.mode == expected_mode
-            ), f"{fmt} output should be {expected_mode}"
+            with Image.open(output_path) as output_image:
+                assert (
+                    output_image.mode == expected_mode
+                ), f"{fmt} output should be {expected_mode}"
 
-            # Map format names to PIL's canonical format names
-            expected_pil_format = {
-                "jpg": "JPEG",
-                "jpeg": "JPEG",
-                "png": "PNG",
-                "webp": "WEBP",
-            }
-            expected_format = expected_pil_format.get(fmt.lower(), fmt.upper())
-            assert (
-                output_image.format == expected_format
-            ), f"Output format should be {expected_format}, got {output_image.format}"
+                # Map format names to PIL's canonical format names
+                expected_pil_format = {
+                    "jpg": "JPEG",
+                    "jpeg": "JPEG",
+                    "png": "PNG",
+                    "webp": "WEBP",
+                }
+                expected_format = expected_pil_format.get(fmt.lower(), fmt.upper())
+                assert (
+                    output_image.format == expected_format
+                ), f"Output format should be {expected_format}, got {output_image.format}"
 
     @pytest.mark.real_processing
     def test_e2e_large_image_processing(self, temp_output_dir):
@@ -209,12 +205,12 @@ class TestCLIE2E:
         assert output_path.exists(), "Large image output was not created"
 
         # Verify output maintains original size
-        output_image = Image.open(output_path)
-        assert output_image.size == (
-            2048,
-            1536,
-        ), "Large image output size should match input"
-        assert output_image.mode == "RGBA", "Large image output should be RGBA"
+        with Image.open(output_path) as output_image:
+            assert output_image.size == (
+                2048,
+                1536,
+            ), "Large image output size should match input"
+            assert output_image.mode == "RGBA", "Large image output should be RGBA"
 
     @pytest.mark.real_processing
     def test_e2e_unicode_filename(self, real_test_image_path, temp_output_dir):
@@ -244,8 +240,8 @@ class TestCLIE2E:
         assert unicode_output_path.exists(), "Unicode filename output was not created"
 
         # Verify output properties
-        output_image = Image.open(unicode_output_path)
-        assert output_image.mode == "RGBA", "Unicode filename output should be RGBA"
+        with Image.open(unicode_output_path) as output_image:
+            assert output_image.mode == "RGBA", "Unicode filename output should be RGBA"
 
     @pytest.mark.real_processing
     def test_e2e_progress_indication(self, real_test_image_path, temp_output_dir):
@@ -286,8 +282,8 @@ class TestCLIE2E:
         assert expected_output.exists(), "Auto-named output file was not created"
 
         # Verify output properties
-        output_image = Image.open(expected_output)
-        assert output_image.mode == "RGBA", "Auto-named output should be RGBA"
+        with Image.open(expected_output) as output_image:
+            assert output_image.mode == "RGBA", "Auto-named output should be RGBA"
 
     @pytest.mark.real_processing
     def test_e2e_quality_comparison(self, real_test_image_path, temp_output_dir):
@@ -369,15 +365,13 @@ class TestCLIE2E:
             assert api_output.exists(), "API output not created"
 
             # Compare basic properties
-            opensource_image = Image.open(opensource_output)
-            api_image = Image.open(api_output)
-
-            assert (
-                opensource_image.size == api_image.size
-            ), "Both models should produce same size output"
-            assert (
-                opensource_image.mode == api_image.mode == "RGBA"
-            ), "Both should produce RGBA output"
+            with Image.open(opensource_output) as opensource_image, Image.open(api_output) as api_image:
+                assert (
+                    opensource_image.size == api_image.size
+                ), "Both models should produce same size output"
+                assert (
+                    opensource_image.mode == api_image.mode == "RGBA"
+                ), "Both should produce RGBA output"
 
 
 class TestCLIE2EErrorHandling:

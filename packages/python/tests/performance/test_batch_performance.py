@@ -40,12 +40,13 @@ def mock_processing():
 
         # Load image to get size
         if isinstance(input_image, str):
-            img = Image.open(input_image)
+            with Image.open(input_image) as img:
+                size = img.size
         else:
-            img = input_image
+            size = input_image.size
 
         # Return mock result
-        return Image.new("RGBA", img.size, color=(100, 150, 200, 128))
+        return Image.new("RGBA", size, color=(100, 150, 200, 128))
 
     return _mock_remove_bg
 
@@ -280,8 +281,9 @@ class TestBatchPerformance:
 
             # Simulate normal processing for valid files
             time.sleep(0.01)
-            img = Image.open(input_image)
-            return Image.new("RGBA", img.size, color=(100, 150, 200, 128))
+            with Image.open(input_image) as img:
+                size = img.size
+            return Image.new("RGBA", size, color=(100, 150, 200, 128))
 
         try:
             model = WithoutBG.opensource()

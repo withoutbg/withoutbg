@@ -140,9 +140,9 @@ class TestRealImageProcessing:
         # Check against expected output with IoU metric
         expected_path = expected_outputs_dir / "test-ice-cream.png"
         if expected_path.exists():
-            expected = Image.open(expected_path)
-            # Use IoU for interpretable alpha channel comparison
-            assert_alpha_iou(result, expected, min_iou=0.97)
+            with Image.open(expected_path) as expected:
+                # Use IoU for interpretable alpha channel comparison
+                assert_alpha_iou(result, expected, min_iou=0.97)
 
     def test_core_api_with_real_model(self, test_images_dir):
         """Test core API WithoutBG class with real processing."""
@@ -154,17 +154,16 @@ class TestRealImageProcessing:
         assert_alpha_channel_valid(result)
 
         # Result should preserve original dimensions
-        original = Image.open(input_path)
-        assert result.size == original.size
+        with Image.open(input_path) as original:
+            assert result.size == original.size
 
     def test_different_input_formats(self, real_opensource_model, test_images_dir):
         """Test processing with different input formats."""
         input_path = test_images_dir / "test-ice-cream.png"
-        original_image = Image.open(input_path)
-
-        # Test with PIL Image
-        result_pil = real_opensource_model.remove_background(original_image)
-        assert_alpha_channel_valid(result_pil)
+        with Image.open(input_path) as original_image:
+            # Test with PIL Image
+            result_pil = real_opensource_model.remove_background(original_image)
+            assert_alpha_channel_valid(result_pil)
 
         # Test with file path (string)
         result_path = real_opensource_model.remove_background(str(input_path))
@@ -261,9 +260,8 @@ class TestRealImageProcessing:
     def test_pipeline_stages_integration(self, real_opensource_model, test_images_dir):
         """Test that the 3-stage pipeline produces reasonable outputs."""
         input_path = test_images_dir / "test-ice-cream.png"
-        original = Image.open(input_path)
-
-        result = real_opensource_model.remove_background(original)
+        with Image.open(input_path) as original:
+            result = real_opensource_model.remove_background(original)
 
         # Validate the result has expected characteristics for ice cream image
         result_array = np.array(result)
@@ -291,12 +289,11 @@ class TestRealImageProcessing:
         result = real_opensource_model.remove_background(input_path)
 
         if expected_path.exists():
-            expected = Image.open(expected_path)
-
-            # Calculate IoU (should be very high since expected was generated
-            # with same model)
-            iou = calculate_alpha_iou(result, expected)
-            print(f"Alpha IoU score: {iou:.4f}")
+            with Image.open(expected_path) as expected:
+                # Calculate IoU (should be very high since expected was generated
+                # with same model)
+                iou = calculate_alpha_iou(result, expected)
+                print(f"Alpha IoU score: {iou:.4f}")
 
             # Should be perfect since we generated expected output with same model
             assert iou >= 0.99, f"IoU should be near-perfect: {iou:.4f}"
