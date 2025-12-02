@@ -1,0 +1,178 @@
+name: Docker Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build only, do not push)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DOCKER_IMAGE_NAME: app
+  DOCKER_HUB_USERNAME: withoutbg
+  AWS_REGION: eu-central-1
+  S3_BUCKET: withoutbg-focus
+
+jobs:
+  docker-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract version from pyproject.toml
+        id: version
+        run: |
+          VERSION=$(grep -m 1 'version = ' apps/web/backend/pyproject.toml | cut -d'"' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION"
+          
+          # Extract semantic version components
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f1-2)
+          echo "MAJOR=$MAJOR" >> $GITHUB_OUTPUT
+          echo "MINOR=$MINOR" >> $GITHUB_OUTPUT
+          echo "🏷️  Tags: $VERSION, $MINOR, $MAJOR, latest"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Download model files from S3
+        run: |
+          echo "📥 Downloading ONNX model files from S3..."
+          mkdir -p models/checkpoints
+          
+          # Download all .onnx files from the bucket root
+          aws s3 cp s3://${{ env.S3_BUCKET }}/depth_anything_v2_vits_slim.onnx models/checkpoints/
+          aws s3 cp s3://${{ env.S3_BUCKET }}/focus_matting_1.0.0.onnx models/checkpoints/
+          aws s3 cp s3://${{ env.S3_BUCKET }}/focus_refiner_1.0.0.onnx models/checkpoints/
+          aws s3 cp s3://${{ env.S3_BUCKET }}/isnet.onnx models/checkpoints/
+          
+          echo "✅ Model files downloaded successfully"
+          echo "📁 Downloaded files:"
+          ls -lh models/checkpoints/
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build and test Docker image locally
+        run: |
+          echo "🔨 Building Docker image for validation..."
+          docker buildx build \
+            --platform linux/amd64 \
+            -f apps/web/Dockerfile \
+            -t ${{ env.DOCKER_IMAGE_NAME }}:test \
+            --load \
+            .
+          
+          echo "✅ Local build successful"
+          
+          echo "🧪 Testing Docker image..."
+          docker run -d --name test-container -p 8080:80 ${{ env.DOCKER_IMAGE_NAME }}:test
+          
+          # Wait for container to start
+          echo "⏳ Waiting for container to start..."
+          sleep 10
+          
+          # Test health endpoint
+          echo "🏥 Testing health endpoint..."
+          curl -f http://localhost:8080/api/health || (docker logs test-container && exit 1)
+          
+          echo "✅ Health check passed"
+          
+          # Cleanup
+          docker stop test-container
+          docker rm test-container
+          
+          echo "✅ Docker image validation complete"
+      
+      - name: Build and push multi-platform Docker image
+        if: ${{ !inputs.dry_run }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.MINOR }}
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.MAJOR }}
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build multi-platform Docker image (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: |
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.MINOR }}
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.MAJOR }}
+            ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Summary
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "## 🚀 Docker Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Multi-platform release **${{ steps.version.outputs.VERSION }}** complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Built for platforms:" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/amd64 (Intel/AMD CPUs, most cloud servers)" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/arm64 (Apple Silicon, AWS Graviton, Raspberry Pi)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏷️ Available tags:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.version.outputs.VERSION }}\` (full version)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.version.outputs.MINOR }}\` (minor version)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.version.outputs.MAJOR }}\` (major version)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🐳 Pull and run:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -p 80:80 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📚 View on Docker Hub:" >> $GITHUB_STEP_SUMMARY
+          echo "https://hub.docker.com/r/${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Summary (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "## 🧪 Docker Build Test Summary (Dry Run)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Multi-platform build **${{ steps.version.outputs.VERSION }}** successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Dry run mode**: Images were built but not pushed to Docker Hub" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Validated for platforms:" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/amd64 (Intel/AMD CPUs)" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/arm64 (Apple Silicon, ARM servers)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To push to Docker Hub, run the workflow without dry run mode." >> $GITHUB_STEP_SUMMARY
+
