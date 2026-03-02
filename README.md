@@ -1,122 +1,105 @@
 # withoutbg
 
-**AI-powered background removal with local and cloud options**
+**Background removal that runs locally or through the API — your choice, based on your constraints.**
 
 [![PyPI](https://img.shields.io/pypi/v/withoutbg.svg)](https://pypi.org/project/withoutbg/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Status](https://img.shields.io/badge/Next_Gen_Model-Coming_Feb_2026-blue?style=for-the-badge&logo=github)](https://github.com/withoutbg/withoutbg/stargazers)
 
-Remove backgrounds from images instantly with AI. Choose between local processing (free) or withoutBG Pro (best quality).
+Two modes: run the open source Focus model locally (free, private, works offline), or call the withoutBG Pro API (better quality, no GPU needed, pay per image). The code is the same either way — just swap the initializer.
 
 
-## ⚡ Try It in 30 Seconds
+## Try It
 
 ![Python Package Intro](/images/python-package-intro.png)
 
 ```bash
-# Install and run in one go
 pip install withoutbg
-
-# Remove background from your first image
 python -c "from withoutbg import WithoutBG; WithoutBG.opensource().remove_background('your-photo.jpg').save('result.png')"
 ```
 
-That's it! Your photo now has a transparent background. ✨
+## Local vs. API: The Real Tradeoff
 
-## 🤔 Which Option Should I Use?
+The local model loads ~320MB of weights into ~2GB of RAM. You pay that cost once per process, then process images for free indefinitely. The API skips all of that — you send an image, get a result in 1-3 seconds, pay per call.
+
+If you're building a product, the API is the right default. You don't want to manage 2GB of model weights in a production service, and the quality is better. The local model makes sense when you need offline or private processing, or when you're running a large batch job and don't want to pay per image.
 
 ```
-Processing 1-10 images occasionally? → withoutBG Pro (zero setup, best quality)
-Processing 100+ images? → Local model (free, reusable)
-Need offline processing? → Local model
-Want best possible quality? → withoutBG Pro
-Building commercial product? → withoutBG Pro (scalable)
-Need fastest processing? → withoutBG Pro (optimized infrastructure)
+Need offline or private processing?     → Local model
+Processing a large batch?               → Local model (pay once, amortize over all images)
+Building a product?                     → withoutBG Pro (better quality, zero infra overhead)
+Occasional use, no setup tolerance?     → withoutBG Pro
 ```
 
 **[Compare Focus vs Pro →](https://withoutbg.com/resources/compare/focus-vs-pro?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Docker (Web Interface)
 
 **[View Complete Dockerized Web App Documentation →](https://withoutbg.com/documentation/integrations/dockerized-web-app?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
-
-![Web Applicacation in Docker](/images/dockerized-app.png)
+![Web Application in Docker](/images/dockerized-app.png)
 ```bash
 docker run -p 80:80 withoutbg/app:latest
-
-# Open in browser
 open http://localhost
 ```
 
-✅ **Multi-platform support**: Works on Intel/AMD (amd64) and ARM (arm64) architectures
+Runs on both amd64 and arm64.
 
 ### Python SDK
 
 **[View Complete Python SDK Documentation →](https://withoutbg.com/documentation/integrations/python-sdk?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
 ```bash
-# Install (using uv - recommended)
 uv add withoutbg
-
-# Or with pip
-pip install withoutbg
+# or: pip install withoutbg
 ```
 
-**Local Processing (Free):**
+**Local model:**
 ```python
 from withoutbg import WithoutBG
 
-# Initialize model once, reuse for multiple images (efficient!)
 model = WithoutBG.opensource()
-result = model.remove_background("input.jpg")  # Returns PIL Image.Image
+result = model.remove_background("input.jpg")  # Returns PIL Image (RGBA)
 result.save("output.png")
 
-# Standard PIL operations work!
-result.show()  # View instantly
-result.resize((500, 500))  # Resize
-result.save("output.webp", quality=95)  # Different format
+result.show()
+result.resize((500, 500))
+result.save("output.webp", quality=95)
 ```
 
-**withoutBG Pro (Best Quality):**
+**withoutBG Pro:**
 
 **[See Pro API Results →](https://withoutbg.com/resources/background-removal-results/model-pro-api?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
 ```python
 from withoutbg import WithoutBG
 
-# Get your API key from withoutbg.com
 model = WithoutBG.api(api_key="sk_your_key")
 result = model.remove_background("input.jpg")
 result.save("output.png")
 
-# Or set environment variable (recommended)
+# Prefer the environment variable so the key stays out of your code
 # export WITHOUTBG_API_KEY=sk_your_key
-model = WithoutBG.api(api_key="sk_your_key")
 ```
 
 **CLI:**
 ```bash
-# Process single image
 withoutbg photo.jpg
 
-# Process entire photo album
 withoutbg ~/Photos/vacation/ --batch --output-dir ~/Photos/vacation-no-bg/
 
-# Convert to JPEG with white background (for printing)
+# Flatten to JPEG with white fill (for printing or upload)
 withoutbg portrait.jpg --format jpg --quality 95
 
-# Use withoutBG Pro for best quality
 export WITHOUTBG_API_KEY=sk_your_key
 withoutbg wedding-photo.jpg --use-api
 
-# Process and watch progress
 withoutbg photo.jpg --verbose
 ```
 
-> **Don't have `uv` yet?** It's a fast, modern Python package installer - get it at [astral.sh/uv](https://astral.sh/uv)
+> Don't have `uv`? It's a faster drop-in for pip. Get it at [astral.sh/uv](https://astral.sh/uv).
 
 ### Example Outputs from the Open Source Model
 
@@ -129,9 +112,9 @@ withoutbg photo.jpg --verbose
 ![Example 4](/sample-results/open-source-focus/example4.png)
 
 
-## 📦 Repository Structure
+## Repository Structure
 
-This is a **monorepo** containing multiple components:
+Monorepo with three layers — packages (reusable libraries), apps (end-user deployments), and integrations (plugin targets):
 
 ```
 withoutbg/
@@ -153,94 +136,88 @@ withoutbg/
 
 ### Components
 
-#### 📚 [Python SDK](packages/python/)
-Core library for background removal. Published to PyPI.
+#### [Python SDK](packages/python/)
+Core library. Published to PyPI as `withoutbg`.
 
 - **Install**: `uv add withoutbg` (or `pip install withoutbg`)
-- **Use**: Python API + CLI
-- **Models**: Focus v1.0.0 (local), withoutBG Pro
+- **Exposes**: Python API + CLI
+- **Models**: Focus v1.0.0 (local), withoutBG Pro (API)
 
-#### 🌐 [Web Application](apps/web/)
-Modern web interface with drag-and-drop UI.
+#### [Web Application](apps/web/)
+Web interface with drag-and-drop, batch processing, and live preview.
 
 - **Stack**: React 18 + FastAPI + Nginx
 - **Deploy**: Docker Compose
-- **Features**: Batch processing, live preview
 
-#### 🔌 Integrations (Coming Soon)
-Plugins for popular creative tools.
-
+#### Integrations (Coming Soon)
 - GIMP plugin
 - Photoshop extension
 - Figma plugin
 - Blender addon
 
-## 🎯 Features
+## Usage Notes
 
-- ✨ **Local Processing**: Free, private, offline with Focus v1.0.0
-- 🚀 **withoutBG Pro**: Best quality, scalable, 99.9% uptime
-- 📦 **Batch Processing**: Process multiple images efficiently
-- 🌐 **Web Interface**: Beautiful drag-and-drop UI
-- 🔧 **CLI Tool**: Command-line automation
-- 🎨 **Integrations**: Work in your favorite tools
+### What gets returned
 
-## 💡 Common Use Cases
+All methods return a PIL `Image` in RGBA mode — a standard Python image object with an alpha channel carrying the mask:
 
-### Understanding Return Values
-All methods return **PIL Image objects** with transparent backgrounds (RGBA mode):
 ```python
 from withoutbg import WithoutBG
 
 model = WithoutBG.opensource()
-result = model.remove_background("photo.jpg")  # Returns PIL Image.Image
+result = model.remove_background("photo.jpg")  # PIL Image, RGBA
 
-# Save in different formats
-result.save("output.png")    # PNG with transparency
-result.save("output.webp")   # WebP with transparency
-result.save("output.jpg", quality=95)  # JPEG (no transparency)
+result.save("output.png")    # PNG preserves the alpha channel
+result.save("output.webp")   # WebP also supports alpha
+result.save("output.jpg", quality=95)  # JPEG drops alpha — you get a flat image
 ```
 
-### Common Gotchas
+### JPEG silently drops transparency
 
-**JPEG Files Don't Support Transparency:**
+JPEG has no alpha channel. Saving to `.jpg` will discard the mask without an error:
+
 ```python
-# ❌ This loses transparency (JPEG doesn't support alpha):
+# This works but you lose the cutout:
 result.save("output.jpg")
 
-# ✅ Use PNG or WebP for transparency:
-result.save("output.png")  # Keeps alpha channel
-result.save("output.webp")  # Also works!
+# Use PNG or WebP to keep it:
+result.save("output.png")
+result.save("output.webp")
 ```
 
-**Model Downloads Happen on First Run:**
+### First-run model download
+
+On first call, `WithoutBG.opensource()` downloads ~320MB of ONNX weights from HuggingFace and caches them locally. This takes 5-10 seconds depending on your connection. Every subsequent run loads from cache and processes in 2-5 seconds per image.
+
 ```python
-# First run: ~5-10 seconds (downloading ~320MB of models from HuggingFace)
-model = WithoutBG.opensource()  # Downloads models to cache
+# First call: downloads 320MB, takes 5-10s
+model = WithoutBG.opensource()
 
-# Second run: Instant! (models cached locally)
-model = WithoutBG.opensource()  # Uses cache
-result = model.remove_background("photo.jpg")  # Now processes in ~2-5s
+# Every call after that: loads from cache, fast
+result = model.remove_background("photo.jpg")
 ```
 
-**Output File Naming:**
-- Single file: `photo.jpg` → `photo-withoutbg.png`
-- Batch: Creates `photo1-withoutbg.png`, `photo2-withoutbg.png`, etc.
-- Custom: Use `--output` or `--output-dir` to specify
+### Batch processing
 
-### Batch Processing (Efficient Model Reuse)
+The model weights stay in RAM as long as the `model` object is alive. If you create a new `WithoutBG` instance for every image, you're loading and unloading 2GB of RAM each time. Don't do that:
+
 ```python
 from withoutbg import WithoutBG
 
-# Initialize model once - loaded into memory
 model = WithoutBG.opensource()
 
-# Process multiple images - model is reused (much faster!)
 images = ["photo1.jpg", "photo2.jpg", "photo3.jpg"]
 results = model.remove_background_batch(images, output_dir="results/")
-# Returns list of PIL Image objects
 ```
 
-### Progress Tracking
+### Output naming
+
+- Single file: `photo.jpg` → `photo-withoutbg.png`
+- Batch: `photo1-withoutbg.png`, `photo2-withoutbg.png`, etc.
+- Override: `--output` (single) or `--output-dir` (batch)
+
+### Progress callback
+
 ```python
 def show_progress(progress):
     print(f"Processing: {progress * 100:.0f}%")
@@ -249,7 +226,8 @@ model = WithoutBG.opensource()
 result = model.remove_background("photo.jpg", progress_callback=show_progress)
 ```
 
-### Error Handling
+### Error handling
+
 ```python
 from withoutbg import WithoutBG, APIError, WithoutBGError
 
@@ -263,7 +241,7 @@ except WithoutBGError as e:
     print(f"Processing error: {e}")
 ```
 
-## ⚡ Performance
+## Performance
 
 | Metric | Local (CPU) | withoutBG Pro |
 |--------|-------------|---------------|
@@ -274,72 +252,63 @@ except WithoutBGError as e:
 | **Setup** | One-time download | API key only |
 | **Cost** | Free forever | Pay per use |
 
-**Model Files (cached after first download):**
+Model breakdown (cached after first download):
+
 - ISNet segmentation: 177 MB
-- Depth Anything V2: 99 MB  
+- Depth Anything V2: 99 MB
 - Focus Matting: 27 MB
 - Focus Refiner: 15 MB
-- **Total: ~320 MB** (one-time download, cached locally)
+- Total: ~320 MB
 
-**💡 Pro Tip:** For batch processing, initialize the model once and reuse it - this is **10-100x faster** than reinitializing for each image!
+For batch jobs, keep the model object alive across all images. Reinitializing for each image reloads the weights every time — 10-100x slower than reusing a single instance.
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
-**Model download fails?**  
-- Check your internet connection
-- Models are downloaded from HuggingFace on first run (~320MB total)
-- Or use local model files (see [Configuration](packages/python/README.md#configuration))
+**Model download fails:**
+- Models are pulled from HuggingFace on first run (~320MB). Check your connection.
+- To use locally cached or custom model files, see [Configuration](packages/python/README.md#configuration).
 
-**Out of memory?**  
-- Try processing smaller images or use withoutBG Pro
-- Reduce batch size when processing multiple images
+**Out of memory:**
+- The local model uses ~2GB of RAM. Either reduce your batch size or switch to the API, which offloads inference entirely.
 
-**Import errors or "module not found"?**
+**Import error or "module not found":**
 ```bash
-# Make sure you're in the right environment
-which python  # Check your Python path
-pip list | grep withoutbg  # Verify installation
+which python          # confirm you're in the right environment
+pip list | grep withoutbg
 
-# If using virtual environment
-source venv/bin/activate  # Activate first
-pip install withoutbg  # Then install
+source venv/bin/activate
+pip install withoutbg
 ```
 
-**API key invalid?**  
-- Get your API key from [withoutbg.com](https://withoutbg.com)
-- Set environment variable: `export WITHOUTBG_API_KEY=sk_your_key`
+**API key rejected:**
+- Get your key at [withoutbg.com](https://withoutbg.com).
+- Set it as an environment variable: `export WITHOUTBG_API_KEY=sk_your_key`
 
-**Slow processing on first run?**  
-- Normal! Models are being downloaded (~320MB)
-- Subsequent runs will be much faster (~2-5s per image)
+**Slow on first run:**
+- Expected. The ~320MB weights are downloading. Subsequent runs use the local cache and take 2-5s per image.
 
-## 📖 Documentation
+## Documentation
 
-- **[Python SDK Docs](packages/python/README.md)** - Complete API reference and examples
-- **[Python SDK Documentation](https://withoutbg.com/documentation/integrations/python-sdk?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** - Online documentation
-- **[Web App Docs](apps/web/README.md)** - Deployment and development guide
-- **[Dockerized Web App Documentation](https://withoutbg.com/documentation/integrations/dockerized-web-app?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** - Online documentation
-- **[withoutBG Pro API Results](https://withoutbg.com/resources/background-removal-results/model-pro-api?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** - See example outputs
-- **[Focus Model Results](https://withoutbg.com/resources/background-removal-results/model-focus-open-source?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** - See example outputs
-- **[Compare Focus vs Pro](https://withoutbg.com/resources/compare/focus-vs-pro?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** - Model comparison
+- **[Python SDK Docs](packages/python/README.md)** — API reference and examples
+- **[Python SDK Documentation](https://withoutbg.com/documentation/integrations/python-sdk?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Online documentation
+- **[Web App Docs](apps/web/README.md)** — Deployment and development guide
+- **[Dockerized Web App Documentation](https://withoutbg.com/documentation/integrations/dockerized-web-app?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Online documentation
+- **[withoutBG Pro API Results](https://withoutbg.com/resources/background-removal-results/model-pro-api?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Example outputs
+- **[Focus Model Results](https://withoutbg.com/resources/background-removal-results/model-focus-open-source?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Example outputs
+- **[Compare Focus vs Pro](https://withoutbg.com/resources/compare/focus-vs-pro?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Model comparison
 
-## 🛠️ Development
+## Development
 
 ### Python Package
 
 ```bash
 cd packages/python
 
-# Install in development mode (using uv - recommended)
 uv sync --extra dev
+# or: pip install -e ".[dev]"
 
-# Or with pip
-pip install -e ".[dev]"
-
-# Run tests
 pytest
 
-# Format code
 black src/ tests/
 ruff check src/ tests/
 ```
@@ -347,10 +316,9 @@ ruff check src/ tests/
 ### Web Application
 
 ```bash
-# Development mode (hot-reload)
 docker-compose -f apps/web/docker-compose.yml up
 
-# Or run components separately
+# Or run the components separately:
 cd apps/web/backend
 uv sync
 uvicorn app.main:app --reload
@@ -360,46 +328,39 @@ npm install
 npm run dev
 ```
 
-## 🌟 Latest Release: Focus v1.0.0
+## Focus v1.0.0
 
-Our most advanced open source model with:
+The current open source model. Key improvements over prior versions:
 
-- ✅ **Significantly better edge detail** - Crisp, clean edges
-- ✅ **Superior hair/fur handling** - Natural-looking fine details  
-- ✅ **Better generalization** - Works on diverse image types
+- Better edge detail, particularly around hair and fur — the hardest case for matting models
+- More consistent generalization across image types
+- Pipeline: ISNet segmentation → Depth Anything V2 guidance → Focus Matting → Focus Refiner
 
-See example outputs above and check [sample-results/](sample-results/) for more visual comparisons.
+See [sample-results/](sample-results/) for visual comparisons.
 
-## 📄 License
+## License
 
-Apache License 2.0 - see [LICENSE](LICENSE)
+Apache License 2.0 — see [LICENSE](LICENSE)
 
 ### Third-Party Components
-- **Depth Anything V2**: Apache 2.0 License (only vits model)
+- **Depth Anything V2**: Apache 2.0 License (vits model only)
 - **ISNet**: Apache 2.0 License
 
 ### Acknowledgements
-- **[segmentation-models-pytorch](https://github.com/qubvel-org/segmentation_models.pytorch)**: MIT License (used to train matting/refiner models)
+- **[segmentation-models-pytorch](https://github.com/qubvel-org/segmentation_models.pytorch)**: MIT License (used to train the matting and refiner models)
 
 See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for complete attribution.
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Read [CONTRIBUTING.md](CONTRIBUTING.md), then open a PR with tests. Small, focused changes are easiest to review.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+## Support
 
-## 📧 Support
+- **Bugs**: [GitHub Issues](https://github.com/withoutbg/withoutbg/issues)
+- **Discussion**: [GitHub Discussions](https://github.com/withoutbg/withoutbg/discussions)
+- **Commercial**: [contact@withoutbg.com](mailto:contact@withoutbg.com)
 
-- **Bug Reports**: [GitHub Issues](https://github.com/withoutbg/withoutbg/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/withoutbg/withoutbg/discussions)
-- **Commercial Support**: [contact@withoutbg.com](mailto:contact@withoutbg.com)
-
-## ⭐ Star History
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=withoutbg/withoutbg&type=Date)](https://star-history.com/#withoutbg/withoutbg&Date)
-
