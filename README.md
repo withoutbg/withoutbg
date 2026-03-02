@@ -15,7 +15,13 @@ Two modes: run the open source Focus model locally (free, private, works offline
 
 ```bash
 pip install withoutbg
-python -c "from withoutbg import WithoutBG; WithoutBG.opensource().remove_background('your-photo.jpg').save('result.png')"
+```
+
+```python
+from withoutbg import WithoutBG
+
+model = WithoutBG.opensource()
+model.remove_background("your-photo.jpg").save("result.png")
 ```
 
 ## Local vs. API: The Real Tradeoff
