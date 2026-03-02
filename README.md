@@ -1,12 +1,12 @@
 # withoutbg
 
-**Background removal that runs locally or through the API — your choice, based on your constraints.**
+**Background removal that runs locally or through the API. Pick whichever fits your constraints.**
 
 [![PyPI](https://img.shields.io/pypi/v/withoutbg.svg)](https://pypi.org/project/withoutbg/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Status](https://img.shields.io/badge/Next_Gen_Model-Coming_Feb_2026-blue?style=for-the-badge&logo=github)](https://github.com/withoutbg/withoutbg/stargazers)
 
-Two modes: run the open source Focus model locally (free, private, works offline), or call the withoutBG Pro API (better quality, no GPU needed, pay per image). The code is the same either way — just swap the initializer.
+Two modes: run the open source Focus model locally (free, private, works offline), or call the withoutBG Pro API (better quality, no GPU needed, pay per image). The code is the same either way; just swap the initializer.
 
 
 ## Try It
@@ -26,7 +26,7 @@ model.remove_background("your-photo.jpg").save("result.png")
 
 ## Local vs. API: The Real Tradeoff
 
-The local model loads ~320MB of weights into ~2GB of RAM. You pay that cost once per process, then process images for free indefinitely. The API skips all of that — you send an image, get a result in 1-3 seconds, pay per call.
+The local model loads ~320MB of weights into ~2GB of RAM. You pay that cost once per process, then process images for free indefinitely. The API skips all of that: send an image, get a result in 1-3 seconds, pay per call.
 
 If you're building a product, the API is the right default. You don't want to manage 2GB of model weights in a production service, and the quality is better. The local model makes sense when you need offline or private processing, or when you're running a large batch job and don't want to pay per image.
 
@@ -120,7 +120,7 @@ withoutbg photo.jpg --verbose
 
 ## Repository Structure
 
-Monorepo with three layers — packages (reusable libraries), apps (end-user deployments), and integrations (plugin targets):
+Monorepo with three layers: packages (reusable libraries), apps (end-user deployments), and integrations (plugin targets):
 
 ```
 withoutbg/
@@ -165,7 +165,7 @@ Web interface with drag-and-drop, batch processing, and live preview.
 
 ### What gets returned
 
-All methods return a PIL `Image` in RGBA mode — a standard Python image object with an alpha channel carrying the mask:
+All methods return a PIL `Image` in RGBA mode, a standard Python image object with an alpha channel carrying the mask:
 
 ```python
 from withoutbg import WithoutBG
@@ -175,7 +175,7 @@ result = model.remove_background("photo.jpg")  # PIL Image, RGBA
 
 result.save("output.png")    # PNG preserves the alpha channel
 result.save("output.webp")   # WebP also supports alpha
-result.save("output.jpg", quality=95)  # JPEG drops alpha — you get a flat image
+result.save("output.jpg", quality=95)  # JPEG drops alpha; you get a flat image
 ```
 
 ### JPEG silently drops transparency
@@ -266,7 +266,7 @@ Model breakdown (cached after first download):
 - Focus Refiner: 15 MB
 - Total: ~320 MB
 
-For batch jobs, keep the model object alive across all images. Reinitializing for each image reloads the weights every time — 10-100x slower than reusing a single instance.
+For batch jobs, keep the model object alive across all images. Reinitializing for each image reloads the weights every time, which is 10-100x slower than reusing a single instance.
 
 ## Troubleshooting
 
@@ -295,13 +295,13 @@ pip install withoutbg
 
 ## Documentation
 
-- **[Python SDK Docs](packages/python/README.md)** — API reference and examples
-- **[Python SDK Documentation](https://withoutbg.com/documentation/integrations/python-sdk?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Online documentation
-- **[Web App Docs](apps/web/README.md)** — Deployment and development guide
-- **[Dockerized Web App Documentation](https://withoutbg.com/documentation/integrations/dockerized-web-app?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Online documentation
-- **[withoutBG Pro API Results](https://withoutbg.com/resources/background-removal-results/model-pro-api?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Example outputs
-- **[Focus Model Results](https://withoutbg.com/resources/background-removal-results/model-focus-open-source?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Example outputs
-- **[Compare Focus vs Pro](https://withoutbg.com/resources/compare/focus-vs-pro?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** — Model comparison
+- **[Python SDK Docs](packages/python/README.md)**: API reference and examples
+- **[Python SDK Documentation](https://withoutbg.com/documentation/integrations/python-sdk?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**: Online documentation
+- **[Web App Docs](apps/web/README.md)**: Deployment and development guide
+- **[Dockerized Web App Documentation](https://withoutbg.com/documentation/integrations/dockerized-web-app?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**: Online documentation
+- **[withoutBG Pro API Results](https://withoutbg.com/resources/background-removal-results/model-pro-api?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**: Example outputs
+- **[Focus Model Results](https://withoutbg.com/resources/background-removal-results/model-focus-open-source?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**: Example outputs
+- **[Compare Focus vs Pro](https://withoutbg.com/resources/compare/focus-vs-pro?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**: Model comparison
 
 ## Development
 
@@ -338,7 +338,7 @@ npm run dev
 
 The current open source model. Key improvements over prior versions:
 
-- Better edge detail, particularly around hair and fur — the hardest case for matting models
+- Better edge detail, particularly around hair and fur (the hardest case for matting models)
 - More consistent generalization across image types
 - Pipeline: ISNet segmentation → Depth Anything V2 guidance → Focus Matting → Focus Refiner
 
@@ -346,7 +346,7 @@ See [sample-results/](sample-results/) for visual comparisons.
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE)
+Apache License 2.0. See [LICENSE](LICENSE)
 
 ### Third-Party Components
 - **Depth Anything V2**: Apache 2.0 License (vits model only)
