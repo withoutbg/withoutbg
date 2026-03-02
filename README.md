@@ -129,13 +129,6 @@ withoutbg photo.jpg --verbose
 ![Example 4](/sample-results/open-source-focus/example4.png)
 
 
-## withoutBG Zoom is coming! 
-
-![withoutBG Zoom](/images/withoutBG-zoom-announcement.gif)
-
-We are finalizing a new architecture designed to deliver superior accuracy and finer detail. Star the repo to bookmark this upgrade for your future toolkit ⭐.
-
-
 ## 📦 Repository Structure
 
 This is a **monorepo** containing multiple components:
