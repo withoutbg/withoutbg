@@ -87,7 +87,7 @@ def main(
 
     try:
         # Determine if using API
-        using_api = use_api or api_key or model == "api"
+        using_api = use_api or model == "api"
 
         if using_api and not api_key:
             click.echo("Error: API key required when using API service", err=True)
