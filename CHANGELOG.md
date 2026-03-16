@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/withoutbg/withoutbg/compare/v1.2.0...v1.2.1) (2026-03-16)
+
+
+### 🐛 Bug Fixes
+
+* cli apikey bug fix ([57177b8](https://github.com/withoutbg/withoutbg/commit/57177b8354fa0a3e256b6ec3e895e49ec4dfe5ed))
+
 ## [1.1.0](https://github.com/withoutbg/withoutbg/compare/v1.0.0...v1.1.0) (2025-12-02)
 
 
