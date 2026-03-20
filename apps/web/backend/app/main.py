@@ -9,17 +9,18 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, ImageOps 
+from PIL import Image, ImageOps
 import pillow_heif  # Required for HEIF/HEIC decoding
 import uvicorn
 
-# Enable HEIF support globally for Pillow
-pillow_heif.register_heif_opener()
 
 # Import withoutbg package (install via: uv sync or pip install -e ../../../packages/python)
 from withoutbg import WithoutBG, __version__
 from withoutbg.exceptions import WithoutBGError
 from withoutbg.api import ProAPI
+
+# Enable HEIF support globally for Pillow
+pillow_heif.register_heif_opener()
 
 app = FastAPI(
     title="withoutbg API",
@@ -60,7 +61,7 @@ async def health_check():
         "status": "healthy",
         "version": __version__,
         "service": "withoutbg-api",
-        "models_loaded": _model is not None
+        "models_loaded": _model is not None,
     }
 
 
@@ -73,13 +74,13 @@ async def remove_background_endpoint(
 ):
     """
     Remove background from a single image.
-    
+
     Args:
         file: Image file to process
         format: Output format (png, jpg, webp)
         quality: Quality for JPEG output (1-100)
         api_key: Optional API key for cloud processing
-    
+
     Returns:
         Processed image with background removed
     """
@@ -87,18 +88,20 @@ async def remove_background_endpoint(
         # Support standard image types and native Apple HEIC/HEIF
         is_image = file.content_type and file.content_type.startswith("image/")
         is_heic = file.filename and file.filename.lower().endswith((".heic", ".heif"))
-        
+
         if not (is_image or is_heic):
-            raise HTTPException(status_code=400, detail="File must be an image (JPEG, PNG, or HEIC)")
-        
+            raise HTTPException(
+                status_code=400, detail="File must be an image (JPEG, PNG, or HEIC)"
+            )
+
         # Read uploaded file
         contents = await file.read()
         raw_image = Image.open(io.BytesIO(contents))
-        
+
         # 1. Apply EXIF orientation (prevents rotated mobile uploads)
         # 2. Force RGBA for consistency across inference models
         input_image = ImageOps.exif_transpose(raw_image).convert("RGBA")
-        
+
         # Process image using appropriate model
         if api_key:
             # Use API for this specific request
@@ -109,13 +112,13 @@ async def remove_background_endpoint(
             if _model is None:
                 raise HTTPException(
                     status_code=503,
-                    detail="Models not loaded. Server may still be starting up."
+                    detail="Models not loaded. Server may still be starting up.",
                 )
             result = _model.remove_background(input_image)
-        
+
         # Convert result to bytes
         output_buffer = io.BytesIO()
-        
+
         # Handle format conversion
         if format.lower() in ["jpg", "jpeg"]:
             # Convert RGBA to RGB for JPEG
@@ -132,17 +135,15 @@ async def remove_background_endpoint(
         else:  # PNG
             result.save(output_buffer, format="PNG")
             media_type = "image/png"
-        
+
         output_buffer.seek(0)
-        
+
         return Response(
             content=output_buffer.getvalue(),
             media_type=media_type,
-            headers={
-                "Content-Disposition": f"inline; filename=withoutbg.{format}"
-            }
+            headers={"Content-Disposition": f"inline; filename=withoutbg.{format}"},
         )
-        
+
     except WithoutBGError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
@@ -153,10 +154,10 @@ async def remove_background_endpoint(
 async def get_usage_endpoint(api_key: str):
     """
     Get API usage statistics.
-    
+
     Args:
         api_key: API key for cloud service
-    
+
     Returns:
         Usage statistics
     """
@@ -172,7 +173,7 @@ async def get_usage_endpoint(api_key: str):
 if STATIC_DIR.exists():
     # Serve static assets (js, css, images, etc.)
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
-    
+
     # Root route - serve index.html
     @app.get("/")
     async def root():
@@ -181,7 +182,7 @@ if STATIC_DIR.exists():
         if index_path.exists():
             return FileResponse(index_path)
         raise HTTPException(status_code=404, detail="Frontend not found")
-    
+
     # Catch-all route for React SPA - must be last
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
@@ -189,17 +190,17 @@ if STATIC_DIR.exists():
         # Don't serve frontend for API routes
         if full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="API endpoint not found")
-        
+
         # Try to serve the requested file
         file_path = STATIC_DIR / full_path
         if file_path.is_file():
             return FileResponse(file_path)
-        
+
         # Otherwise, serve index.html (SPA routing)
         index_path = STATIC_DIR / "index.html"
         if index_path.exists():
             return FileResponse(index_path)
-        
+
         raise HTTPException(status_code=404, detail="Not found")
 
 
