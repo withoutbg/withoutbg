@@ -26,6 +26,23 @@ export const removeBackground = async (file, options = {}) => {
   return response.data;
 };
 
+export const removeBackgroundFromUrl = async (imageUrl, options = {}) => {
+  const formData = new FormData();
+  formData.append('image_url', imageUrl);
+  formData.append('format', options.format || 'png');
+  formData.append('quality', options.quality || 95);
+
+  if (options.apiKey) {
+    formData.append('api_key', options.apiKey);
+  }
+
+  const response = await api.post('/remove-background', formData, {
+    responseType: 'blob',
+  });
+
+  return response.data;
+};
+
 export const healthCheck = async () => {
   const response = await api.get('/health');
   return response.data;
@@ -35,11 +52,3 @@ export const getUsage = async (apiKey) => {
   const response = await api.get(`/usage?api_key=${apiKey}`);
   return response.data;
 };
-
-
-
-
-
-
-
-
