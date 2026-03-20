@@ -74,6 +74,9 @@ async def remove_background_endpoint(
 ):
     """
     Remove background from a single image.
+    
+    Supports standard formats (PNG, JPG, WebP) and native Apple HEIC/HEIF files.
+    Automatically handles EXIF orientation to ensure upright output.
 
     Args:
         file: Image file to process
