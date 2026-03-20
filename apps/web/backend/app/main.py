@@ -9,8 +9,12 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image
+from PIL import Image, ImageOps 
+import pillow_heif  # Required for HEIF/HEIC decoding
 import uvicorn
+
+# Enable HEIF support globally for Pillow
+pillow_heif.register_heif_opener()
 
 # Import withoutbg package (install via: uv sync or pip install -e ../../../packages/python)
 from withoutbg import WithoutBG, __version__
@@ -80,13 +84,20 @@ async def remove_background_endpoint(
         Processed image with background removed
     """
     try:
-        # Validate file type
-        if not file.content_type or not file.content_type.startswith("image/"):
-            raise HTTPException(status_code=400, detail="File must be an image")
+        # Support standard image types and native Apple HEIC/HEIF
+        is_image = file.content_type and file.content_type.startswith("image/")
+        is_heic = file.filename and file.filename.lower().endswith((".heic", ".heif"))
+        
+        if not (is_image or is_heic):
+            raise HTTPException(status_code=400, detail="File must be an image (JPEG, PNG, or HEIC)")
         
         # Read uploaded file
         contents = await file.read()
-        input_image = Image.open(io.BytesIO(contents))
+        raw_image = Image.open(io.BytesIO(contents))
+        
+        # 1. Apply EXIF orientation (prevents rotated mobile uploads)
+        # 2. Force RGBA for consistency across inference models
+        input_image = ImageOps.exif_transpose(raw_image).convert("RGBA")
         
         # Process image using appropriate model
         if api_key:
