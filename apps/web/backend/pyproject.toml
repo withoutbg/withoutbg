@@ -9,6 +9,7 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "python-multipart>=0.0.12",
     "pillow>=8.0.0",
+    "pillow-heif>=1.3.0",
 ]
 
 [build-system]
@@ -17,3 +18,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.uv.sources]
+withoutbg = { path = "../../../packages/python", editable = true }
