@@ -1,6 +1,6 @@
 [project]
 name = "withoutbg-backend"
-version = "1.2.1"
+version = "1.3.0"
 description = "FastAPI backend for withoutbg web application"
 requires-python = ">=3.12"
 dependencies = [

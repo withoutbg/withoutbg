@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.0](https://github.com/withoutbg/withoutbg/compare/v1.2.1...v1.3.0) (2026-04-13)
+
+
+### ✨ Features
+
+* **backend:** add native HEIC support and fix EXIF orientation ([d12a41c](https://github.com/withoutbg/withoutbg/commit/d12a41c4f54abc82718e5e97497d9be88f06a874))
+* **backend:** add native HEIC support and fix EXIF orientation ([886d2b7](https://github.com/withoutbg/withoutbg/commit/886d2b7be42d6eac7774c9c509823c8a30654831))
+* **backend:** add native HEIC support and fix EXIF orientation ([388fcb9](https://github.com/withoutbg/withoutbg/commit/388fcb9fdab91fe4aaafc7111dac430c6cfc5abd))
+
 ## [1.2.1](https://github.com/withoutbg/withoutbg/compare/v1.2.0...v1.2.1) (2026-03-16)
 
 
