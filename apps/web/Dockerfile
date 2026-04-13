@@ -73,8 +73,16 @@ RUN cd /app/packages/python && \
 # Copy backend application code
 COPY apps/web/backend/ ./backend/
 
-# Copy ONNX model checkpoints
-COPY models/checkpoints/ ./checkpoints/
+# Download ONNX model checkpoints from Hugging Face
+RUN mkdir -p /app/checkpoints && \
+    curl -fL --retry 3 -o /app/checkpoints/depth_anything_v2_vits_slim.onnx \
+        "https://huggingface.co/withoutbg/focus/resolve/main/depth_anything_v2_vits_slim.onnx" && \
+    curl -fL --retry 3 -o /app/checkpoints/isnet.onnx \
+        "https://huggingface.co/withoutbg/focus/resolve/main/isnet.onnx" && \
+    curl -fL --retry 3 -o /app/checkpoints/focus_matting_1.0.0.onnx \
+        "https://huggingface.co/withoutbg/focus/resolve/main/focus_matting_1.0.0.onnx" && \
+    curl -fL --retry 3 -o /app/checkpoints/focus_refiner_1.0.0.onnx \
+        "https://huggingface.co/withoutbg/focus/resolve/main/focus_refiner_1.0.0.onnx"
 
 # Copy built frontend from frontend builder to static directory
 COPY --from=frontend-builder /app/dist ./static

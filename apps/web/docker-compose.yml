@@ -23,7 +23,6 @@ services:
       # Mount source code for hot-reload (correct path for Python 3.12 venv)
       - ../../packages/python/src/withoutbg:/app/apps/web/backend/.venv/lib/python3.12/site-packages/withoutbg:ro
       - ./backend:/app/backend:ro
-      - ../../models/checkpoints:/app/checkpoints:ro
     working_dir: /app
     command: [ "/app/apps/web/backend/.venv/bin/python", "-m", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
     networks:
