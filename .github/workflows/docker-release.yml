@@ -23,8 +23,6 @@ on:
 env:
   DOCKER_IMAGE_NAME: app
   DOCKER_HUB_USERNAME: withoutbg
-  AWS_REGION: eu-central-1
-  S3_BUCKET: withoutbg-focus
 
 jobs:
   docker-release:
@@ -114,28 +112,6 @@ jobs:
           echo ""
           echo "📦 Building version: $VERSION"
           echo "🏷️  Tags: $VERSION, $VERSION_MINOR, $VERSION_MAJOR, latest"
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Download model files from S3
-        run: |
-          echo "📥 Downloading ONNX model files from S3..."
-          mkdir -p models/checkpoints
-          
-          # Download all .onnx files from the bucket root
-          aws s3 cp s3://${{ env.S3_BUCKET }}/depth_anything_v2_vits_slim.onnx models/checkpoints/
-          aws s3 cp s3://${{ env.S3_BUCKET }}/focus_matting_1.0.0.onnx models/checkpoints/
-          aws s3 cp s3://${{ env.S3_BUCKET }}/focus_refiner_1.0.0.onnx models/checkpoints/
-          aws s3 cp s3://${{ env.S3_BUCKET }}/isnet.onnx models/checkpoints/
-          
-          echo "✅ Model files downloaded successfully"
-          echo "📁 Downloaded files:"
-          ls -lh models/checkpoints/
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
