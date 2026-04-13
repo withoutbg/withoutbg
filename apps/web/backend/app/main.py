@@ -10,14 +10,17 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image
+from PIL import Image, ImageOps
+import pillow_heif  # Required for HEIF/HEIC decoding
 import uvicorn
 
-# Import withoutbg package
-# (install via: uv sync or pip install -e ../../../packages/python)
+# Import withoutbg package (install via: uv sync or pip install -e ../../../packages/python)
 from withoutbg import WithoutBG, __version__
 from withoutbg.exceptions import WithoutBGError
 from withoutbg.api import ProAPI
+
+# Enable HEIF support globally for Pillow
+pillow_heif.register_heif_opener()
 
 app = FastAPI(
     title="withoutbg API",
@@ -149,6 +152,9 @@ async def remove_background_endpoint(
     Provide either `file` (a direct upload) **or** `image_url` (a publicly
     accessible URL). If both are supplied, `file` takes precedence.
 
+    Supports standard formats (PNG, JPG, WebP) and native Apple HEIC/HEIF files.
+    Automatically handles EXIF orientation to ensure upright output.
+
     Args:
         file: Image file to process (multipart upload).
         image_url: Public URL of an image to fetch and process.
@@ -162,19 +168,27 @@ async def remove_background_endpoint(
     """
     # ── 1. Resolve input image ────────────────────────────────────────────────
     if file is not None:
-        # Direct upload path (original behaviour)
-        if not file.content_type or not file.content_type.startswith("image/"):
+        # Support standard image types and native Apple HEIC/HEIF
+        is_image = file.content_type and file.content_type.startswith("image/")
+        is_heic = file.filename and file.filename.lower().endswith((".heic", ".heif"))
+
+        if not (is_image or is_heic):
             raise HTTPException(
-                status_code=400, detail="Uploaded file must be an image."
+                status_code=400, detail="File must be an image (JPEG, PNG, or HEIC)"
             )
+
         contents = await file.read()
         try:
-            input_image = Image.open(io.BytesIO(contents))
+            raw_image = Image.open(io.BytesIO(contents))
         except Exception:
             raise HTTPException(
                 status_code=400,
                 detail="Uploaded file could not be decoded as an image.",
             )
+
+        # Apply EXIF orientation (prevents rotated mobile uploads)
+        # Force RGBA for consistency across inference models
+        input_image = ImageOps.exif_transpose(raw_image).convert("RGBA")
 
     elif image_url:
         # URL input path (new)
@@ -276,10 +290,12 @@ if STATIC_DIR.exists():
         if full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="API endpoint not found")
 
+        # Try to serve the requested file
         file_path = STATIC_DIR / full_path
         if file_path.is_file():
             return FileResponse(file_path)
 
+        # Otherwise, serve index.html (SPA routing)
         index_path = STATIC_DIR / "index.html"
         if index_path.exists():
             return FileResponse(index_path)
