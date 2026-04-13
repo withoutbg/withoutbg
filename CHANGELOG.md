@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.1](https://github.com/withoutbg/withoutbg/compare/v1.3.0...v1.3.1) (2026-04-13)
+
+
+### 🐛 Bug Fixes
+
+* **docker:** download model checkpoints from HuggingFace during build ([276c8e8](https://github.com/withoutbg/withoutbg/commit/276c8e8be71537c63a506477d41585d0b7bbc049)), closes [#16](https://github.com/withoutbg/withoutbg/issues/16)
+* **mypy:** skip huggingface_hub imports to resolve Python 3.9 syntax error ([62a2fed](https://github.com/withoutbg/withoutbg/commit/62a2fed4fa6ae80a8208ba88cb7a7d6466888350))
+
 ## [1.3.0](https://github.com/withoutbg/withoutbg/compare/v1.2.1...v1.3.0) (2026-04-13)
 
 
