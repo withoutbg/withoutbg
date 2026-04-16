@@ -1,11 +1,1 @@
 """Backend application package."""
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { removeBackground } from '../../api'
+import { removeBackground, removeBackgroundFromUrl } from '../../api'
 import {
     ProcessingTypeTabs,
     ProcessingModeDescription,
@@ -10,7 +10,7 @@ import {
 } from './'
 import { PrimaryButton } from '../ui/PrimaryButton'
 import { SecondaryButton } from '../ui/SecondaryButton'
-import { Hourglass, CheckCircle2, AlertCircle, Download, Star } from 'lucide-react'
+import { Hourglass, CheckCircle2, AlertCircle, Download, Star, Link, Upload } from 'lucide-react'
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -28,6 +28,70 @@ const statusBadgeClasses = {
     error: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200'
 }
 
+/** Minimal URL input tab — sits above (or alongside) the existing dropzone */
+const UrlInputPanel = ({ onSubmit, disabled }) => {
+    const [url, setUrl] = useState('')
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        const trimmed = url.trim()
+        if (!trimmed) return
+        onSubmit(trimmed)
+        setUrl('')
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+            <div className="relative flex-1">
+                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    disabled={disabled}
+                    className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+            </div>
+            <PrimaryButton
+                type="submit"
+                disabled={disabled || !url.trim()}
+                className="px-4 py-2.5 text-sm shrink-0"
+            >
+                Process
+            </PrimaryButton>
+        </form>
+    )
+}
+
+/** Toggle between Upload and URL tabs */
+const InputModeTabs = ({ mode, onChange }) => (
+    <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg w-fit mb-4">
+        <button
+            onClick={() => onChange('upload')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                mode === 'upload'
+                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+        >
+            <Upload className="w-3.5 h-3.5" />
+            Upload
+        </button>
+        <button
+            onClick={() => onChange('url')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                mode === 'url'
+                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+        >
+            <Link className="w-3.5 h-3.5" />
+            URL
+        </button>
+    </div>
+)
+
 /**
  * RemoveBackground component - handles image background removal
  */
@@ -38,6 +102,7 @@ export const RemoveBackground = () => {
     const [error, setError] = useState(null)
     const [queueRunning, setQueueRunning] = useState(false)
     const [starCount, setStarCount] = useState(null)
+    const [inputMode, setInputMode] = useState('upload') // 'upload' | 'url'
 
     const uploadsRef = useRef(uploads)
     useEffect(() => {
@@ -46,26 +111,20 @@ export const RemoveBackground = () => {
 
     const revokeObjectUrls = useCallback((items) => {
         items.forEach(item => {
-            if (item.preview) {
-                URL.revokeObjectURL(item.preview)
-            }
-            if (item.resultUrl) {
-                URL.revokeObjectURL(item.resultUrl)
-            }
+            if (item.preview) URL.revokeObjectURL(item.preview)
+            if (item.resultUrl) URL.revokeObjectURL(item.resultUrl)
         })
     }, [])
 
     useEffect(() => {
-        return () => {
-            revokeObjectUrls(uploadsRef.current)
-        }
+        return () => { revokeObjectUrls(uploadsRef.current) }
     }, [revokeObjectUrls])
 
     // Fetch GitHub star count
     useEffect(() => {
         const CACHE_KEY = 'withoutbg_star_count'
         const CACHE_TIMESTAMP_KEY = 'withoutbg_star_count_timestamp'
-        const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
+        const CACHE_DURATION = 1000 * 60 * 60
 
         const fetchStarCount = async () => {
             try {
@@ -123,26 +182,54 @@ export const RemoveBackground = () => {
             name: file.name,
             status: 'pending',
             resultUrl: null,
-            error: null
+            error: null,
+            sourceType: 'file'
         }))
 
         uploadsRef.current = mapped
         setUploads(mapped)
     }, [revokeObjectUrls])
 
+    // Handle URL submission — adds a single item to the queue
+    const onUrlSubmit = useCallback((imageUrl) => {
+        setError(null)
+
+        if (processingType === 'api' && !apiKey) {
+            setError('API key is required for API processing')
+            return
+        }
+
+        revokeObjectUrls(uploadsRef.current)
+
+        const id = `url-${Date.now()}-${imageUrl}`
+        // Derive a display name from the URL path
+        const name = imageUrl.split('/').pop().split('?')[0] || 'image'
+
+        const item = {
+            id,
+            file: null,
+            imageUrl,
+            preview: imageUrl,   // use the URL directly as preview src
+            name,
+            status: 'pending',
+            resultUrl: null,
+            error: null,
+            sourceType: 'url'
+        }
+
+        uploadsRef.current = [item]
+        setUploads([item])
+    }, [apiKey, processingType, revokeObjectUrls])
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: {
-            'image/*': ['.png', '.jpg', '.jpeg', '.webp']
-        },
+        accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] },
         multiple: true
     })
 
     const updateUpload = useCallback((index, updater) => {
         setUploads(prev => {
-            if (!prev[index]) {
-                return prev
-            }
+            if (!prev[index]) return prev
 
             const updated = [...prev]
             const current = updated[index]
@@ -159,9 +246,7 @@ export const RemoveBackground = () => {
     }, [])
 
     const processQueue = useCallback(async () => {
-        if (queueRunning) {
-            return
-        }
+        if (queueRunning) return
 
         if (processingType === 'api' && !apiKey) {
             setError('API key is required for API processing')
@@ -173,23 +258,29 @@ export const RemoveBackground = () => {
         try {
             while (true) {
                 const nextIndex = uploadsRef.current.findIndex(item => item.status === 'pending')
-                if (nextIndex === -1) {
-                    break
-                }
+                if (nextIndex === -1) break
 
                 const current = uploadsRef.current[nextIndex]
-                if (!current) {
-                    break
-                }
+                if (!current) break
 
                 setError(null)
                 updateUpload(nextIndex, (item) => ({ ...item, status: 'processing', error: null }))
 
                 try {
-                    const blob = await removeBackground(current.file, {
-                        format: 'png',
-                        apiKey: processingType === 'api' ? apiKey : undefined
-                    })
+                    let blob
+
+                    if (current.sourceType === 'url') {
+                        // Call the URL variant of the API helper
+                        blob = await removeBackgroundFromUrl(current.imageUrl, {
+                            format: 'png',
+                            apiKey: processingType === 'api' ? apiKey : undefined
+                        })
+                    } else {
+                        blob = await removeBackground(current.file, {
+                            format: 'png',
+                            apiKey: processingType === 'api' ? apiKey : undefined
+                        })
+                    }
 
                     const resultUrl = URL.createObjectURL(blob)
                     updateUpload(nextIndex, (item) => ({ ...item, status: 'success', resultUrl, error: null }))
@@ -209,9 +300,7 @@ export const RemoveBackground = () => {
     }, [apiKey, processingType, queueRunning, updateUpload])
 
     useEffect(() => {
-        if (uploads.length === 0) {
-            return
-        }
+        if (uploads.length === 0) return
 
         const hasPending = uploads.some(item => item.status === 'pending')
         if (hasPending) {
@@ -235,9 +324,7 @@ export const RemoveBackground = () => {
     const downloadAll = useCallback(() => {
         uploads.forEach((item, index) => {
             if (item.status === 'success' && item.resultUrl) {
-                setTimeout(() => {
-                    downloadImage(item.resultUrl, item.name)
-                }, index * 150)
+                setTimeout(() => { downloadImage(item.resultUrl, item.name) }, index * 150)
             }
         })
     }, [downloadImage, uploads])
@@ -251,16 +338,13 @@ export const RemoveBackground = () => {
     }, [revokeObjectUrls])
 
     const handleStarClick = useCallback(() => {
-        // Clear cache when user clicks to star
         localStorage.removeItem('withoutbg_star_count')
         localStorage.removeItem('withoutbg_star_count_timestamp')
     }, [])
 
     const handleProcessingTypeChange = (type) => {
         setProcessingType(type)
-        if (type === 'local') {
-            setApiKey('')
-        }
+        if (type === 'local') setApiKey('')
         reset()
     }
 
@@ -295,11 +379,22 @@ export const RemoveBackground = () => {
                 />
 
                 {uploads.length === 0 && (
-                    <ImageUploadZone
-                        getRootProps={getRootProps}
-                        getInputProps={getInputProps}
-                        isDragActive={isDragActive}
-                    />
+                    <>
+                        <InputModeTabs mode={inputMode} onChange={setInputMode} />
+
+                        {inputMode === 'upload' ? (
+                            <ImageUploadZone
+                                getRootProps={getRootProps}
+                                getInputProps={getInputProps}
+                                isDragActive={isDragActive}
+                            />
+                        ) : (
+                            <UrlInputPanel
+                                onSubmit={onUrlSubmit}
+                                disabled={queueRunning}
+                            />
+                        )}
+                    </>
                 )}
 
                 <ErrorMessage error={error} />
@@ -327,26 +422,28 @@ export const RemoveBackground = () => {
                                         Download All
                                     </PrimaryButton>
                                 )}
-                                <SecondaryButton
-                                    onClick={reset}
-                                    className="px-4 py-2"
-                                >
+                                <SecondaryButton onClick={reset} className="px-4 py-2">
                                     Reset
                                 </SecondaryButton>
                             </div>
                         </div>
 
                         <div className="space-y-6">
-                            {uploads.map((item, index) => (
+                            {uploads.map((item) => (
                                 <div
                                     key={item.id}
                                     className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-shadow"
                                 >
                                     <div className="flex items-center justify-between mb-3">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate pr-4">
-                                            {item.name}
-                                        </p>
-                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusBadgeClasses[item.status]}`}>
+                                        <div className="flex items-center gap-1.5 min-w-0 pr-4">
+                                            {item.sourceType === 'url' && (
+                                                <Link className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                            )}
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {item.name}
+                                            </p>
+                                        </div>
+                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${statusBadgeClasses[item.status]}`}>
                                             {statusCopy[item.status]}
                                         </span>
                                     </div>
@@ -463,4 +560,3 @@ export const RemoveBackground = () => {
         </div>
     )
 }
-
