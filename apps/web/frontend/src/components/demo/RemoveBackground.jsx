@@ -158,6 +158,50 @@ export const RemoveBackground = () => {
         void fetchStarCount()
     }, [])
 
+    // Handles pasting the images to remove their background
+    useEffect(() => {
+        const handlePaste = (event) => {
+            const clipboardItems = event.clipboardData?.items
+            if (!clipboardItems) return
+
+            const imageFiles = []
+
+            for (const item of clipboardItems) {
+                if (item.type.startsWith('image/')) {
+                    const file = item.getAsFile()
+                    if (file) imageFiles.push(file)
+                }
+            }
+
+            if (imageFiles.length === 0) return
+
+            setInputMode("upload")
+            let items = imageFiles.map((image,i) => {
+                const id = `paste-${Date.now()}-${image.name}-${i}`
+                const name = image.name;
+
+                const item = {
+                    id,
+                    file: image,
+                    preview: URL.createObjectURL(image), 
+                    name,
+                    status: 'pending',
+                    resultUrl: null,
+                    error: null,
+                    sourceType: 'file'
+                }
+                
+                return item
+            });
+
+            uploadsRef.current = [...uploadsRef.current, ...items]
+            setUploads(prev => [...prev, ...items])
+        }
+
+        document.addEventListener('paste', handlePaste)
+        return () => document.removeEventListener('paste', handlePaste)
+    }, [])
+
     const onDrop = useCallback((acceptedFiles) => {
         setError(null)
         const imageFiles = acceptedFiles.filter(file => file.type.startsWith('image/'))
@@ -220,6 +264,8 @@ export const RemoveBackground = () => {
         uploadsRef.current = [item]
         setUploads([item])
     }, [apiKey, processingType, revokeObjectUrls])
+
+    
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
