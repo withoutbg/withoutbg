@@ -120,7 +120,7 @@ select = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 exclude = ["^\\.venv/"]
 warn_return_any = true
 warn_unused_configs = true
@@ -137,10 +137,6 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 module = ["huggingface_hub.*"]
-follow_imports = "skip"
-
-[[tool.mypy.overrides]]
-module = ["numpy.*"]
 follow_imports = "skip"
 
 [tool.pytest.ini_options]
