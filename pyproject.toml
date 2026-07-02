@@ -120,7 +120,7 @@ select = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 exclude = ["^\\.venv/"]
 warn_return_any = true
 warn_unused_configs = true
