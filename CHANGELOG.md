@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.6](https://github.com/withoutbg/withoutbg/compare/v1.0.5...v1.0.6) (2026-07-02)
+
+### Bug Fixes
+
+* **ci:** use Python 3.12 as mypy target for numpy 2.x stubs ([f5cfa68](https://github.com/withoutbg/withoutbg/commit/f5cfa68725fe1b9f210f006ea6bd07c0f139dfe1))
+
 ## [1.0.5](https://github.com/withoutbg/withoutbg/compare/v1.0.4...v1.0.5) (2026-07-02)
 
 ### Bug Fixes
