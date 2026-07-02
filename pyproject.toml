@@ -139,6 +139,10 @@ strict_equality = true
 module = ["huggingface_hub.*"]
 follow_imports = "skip"
 
+[[tool.mypy.overrides]]
+module = ["numpy.*"]
+follow_imports = "skip"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
