@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.0](https://github.com/withoutbg/withoutbg-python/compare/v1.0.6...v1.1.0) (2026-07-17)
+
+### Features
+
+* **models:** support v10 open-weights (448 canvas) ([ee61482](https://github.com/withoutbg/withoutbg-python/commit/ee61482b3babec0262b77ddc37d24d7ebb5c6bf7))
+
 ## Unreleased
 
 ### Features
