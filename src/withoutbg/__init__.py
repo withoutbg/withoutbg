@@ -14,7 +14,7 @@ Quick start::
     result = model.remove_background("photo.jpg")
     result.save("output.png")
 
-See https://withoutbg.com/documentation/integrations/python-sdk for full docs.
+See https://withoutbg.com/docs/open-model/python for full docs.
 """
 
 from .__version__ import __version__

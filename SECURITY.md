@@ -4,7 +4,7 @@
 
 Do not create a public GitHub issue for security vulnerabilities.
 
-Email [security@withoutbg.com](mailto:security@withoutbg.com) with:
+Email [contact@withoutbg.com](mailto:contact@withoutbg.com) with:
 
 - A description of the vulnerability
 - Steps to reproduce

@@ -83,3 +83,12 @@ The older multi-file model (four separate ONNX files: depth, ISNet, matting, ref
 Set `WITHOUTBG_MODEL_PATH` to point at the unified `.onnx` file if you want to use a local copy instead of the Hugging Face download.
 
 The sidecar metadata file (`withoutbg-open-weights.onnx.json`) must be in the same directory as the ONNX file.
+
+### v10 open-weights contract
+
+Model version `10.0.0`:
+
+- Fixed I/O canvas: **448×448** (was 1024 input / 768 output)
+- Sidecar drives `canvas_size` / shapes; package defaults assume 448 when the sidecar is absent
+
+Consumers that hard-coded 1024/768 letterbox sizes should read `canvas_size` from the sidecar instead.

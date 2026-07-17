@@ -13,10 +13,10 @@ from withoutbg.models import OpenWeightsModel
 
 FAKE_MODEL_PATH = "/fake/withoutbg-open-weights.onnx"
 DEFAULT_SIDECAR = {
-    "canvas_size": 1024,
-    "output_canvas_size": 768,
-    "output_shape": [1, 1, 768, 768],
+    "canvas_size": 448,
+    "output_shape": [1, 1, 448, 448],
     "input_name": "rgb",
+    "model_version": "10.0.0",
 }
 
 
@@ -49,7 +49,7 @@ def mock_onnx_setup():
         with patch("pathlib.Path.exists", return_value=True):
             with patch.object(OpenWeightsModel, "_load_sidecar", _load_sidecar):
                 session = Mock()
-                alpha_output = np.full((1, 1, 768, 768), 0.5, dtype=np.float32)
+                alpha_output = np.full((1, 1, 448, 448), 0.5, dtype=np.float32)
                 session.run.return_value = [alpha_output]
                 mock_session.return_value = session
                 yield session
@@ -167,7 +167,7 @@ class TestProcessingBenchmarks:
         preprocessing_time = time.time() - start_time
 
         assert isinstance(rgb, np.ndarray)
-        assert rgb.shape == (1, 3, 1024, 1024)
+        assert rgb.shape == (1, 3, 448, 448)
         assert preprocessing_time < 1.0
         assert new_w > 0 and new_h > 0
         print(f"Preprocessing time (1024x768): {preprocessing_time:.3f}s")

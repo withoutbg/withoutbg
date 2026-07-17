@@ -8,7 +8,7 @@
 
 Two modes that share the same API — run the open-weights model locally (free, private, offline) or call the cloud API (better quality, no GPU, pay per image). Switch with one line of code.
 
-**[View Documentation →](https://withoutbg.com/documentation/integrations/python-sdk?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
+**[View Documentation →](https://withoutbg.com/docs/open-model/python?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
 ## Try it
 
@@ -33,10 +33,10 @@ model.remove_background("photo.jpg").save("result.png")
 | Quality | Good | Better (esp. hair, fur) |
 | Privacy | Stays on your machine | Image sent to API |
 | GPU required | No (CPU ONNX) | No |
-| First-run setup | ~495MB download, once | API key only |
+| First-run setup | ~455MB download, once | API key only |
 | Best for | Offline, private, batch jobs | Products, occasional use |
 
-**[Compare results →](https://withoutbg.com/resources/compare/focus-vs-pro?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
+**[Compare results →](https://withoutbg.com/compare/withoutbg-open-model-vs-pro-model?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
 ```
 Need offline or private processing?   → Local
@@ -111,8 +111,8 @@ withoutbg --help
 
 ## Example outputs
 
-**[See Local model results →](https://withoutbg.com/resources/background-removal-results/model-focus-open-source?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
-**[See Cloud API results →](https://withoutbg.com/resources/background-removal-results/model-pro-api?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
+**[See Local model results →](https://withoutbg.com/open-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
+**[See Cloud API results →](https://withoutbg.com/pro-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
 ![Example 1](sample-results/open-weights/example1.png)
 ![Example 5](sample-results/open-weights/example5.png)
@@ -144,16 +144,16 @@ When using `WITHOUTBG_MODEL_PATH`, the sidecar metadata file (`withoutbg-open-we
 
 | | Local | Cloud |
 |---|---|---|
-| First run | 5–10s (~495MB download) | 1–3s |
+| First run | 5–10s (~455MB download) | 1–3s |
 | Per image | 2–5s | 1–3s |
 | RAM | ~2GB | None |
-| Disk | 495MB (one-time cache) | None |
+| Disk | 455MB (one-time cache) | None |
 
 Keep the model object alive across all images in a batch. Recreating it for every image reloads the weights each time.
 
 ## Troubleshooting
 
-**Model download fails:** The weights are pulled from [Hugging Face](https://huggingface.co/withoutbg/withoutbg-openweights-onnx) on first run (~495MB). Check your connection, or set `WITHOUTBG_MODEL_PATH` to a local copy.
+**Model download fails:** The weights are pulled from [Hugging Face](https://huggingface.co/withoutbg/withoutbg-openweights-onnx) on first run (~455MB). Check your connection, or set `WITHOUTBG_MODEL_PATH` to a local copy.
 
 **Out of memory:** The local model uses ~2GB of RAM. Reduce batch size or switch to Cloud mode.
 
@@ -186,7 +186,7 @@ except WithoutBGError as e:
 
 ## Model
 
-The withoutBG Open Weights Model is a unified WBGNet ONNX graph hosted at [withoutbg/withoutbg-openweights-onnx](https://huggingface.co/withoutbg/withoutbg-openweights-onnx). It runs depth estimation, segmentation, matting, and refinement in a single inference pass at up to 768px output resolution. Licensed under the [withoutBG Open Model License](https://withoutbg.com/open-weights-model/license) (Apache 2.0 for withoutBG portions; Meta DINOv3 License for DINOv3 backbone weights). Built with DINOv3.
+The withoutBG Open Weights Model is a unified ONNX model hosted at [withoutbg/withoutbg-openweights-onnx](https://huggingface.co/withoutbg/withoutbg-openweights-onnx). Licensed under the [withoutBG Open Model License](https://withoutbg.com/open-model/license) (Apache 2.0 for withoutBG portions; Meta DINOv3 License for DINOv3 backbone weights). Built with DINOv3.
 
 ## Development
 
@@ -217,20 +217,18 @@ This Python SDK is licensed under Apache License 2.0. See [LICENSE](LICENSE).
 
 The withoutBG Open Weights Model is a composite artifact with additional terms
 for embedded DINOv3 weights. See the
-[withoutBG Open Model License](https://withoutbg.com/open-weights-model/license),
+[withoutBG Open Model License](https://withoutbg.com/open-model/license),
 [LICENSE-DINOv3](LICENSE-DINOv3), and [NOTICE](NOTICE).
 
 ### Third-party components
 
 - **DINOv3 (Meta)**: Meta DINOv3 License — backbone weights in the Open Weights Model
 - **Depth Anything V2**: Apache 2.0
-- **ISNet**: Apache 2.0
 
 See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for complete attribution.
 
 ## Support
 
 - **Bugs / questions:** [GitHub Issues](https://github.com/withoutbg/withoutbg/issues)
-- **Discussion:** [GitHub Discussions](https://github.com/withoutbg/withoutbg/discussions)
 - **Commercial:** [contact@withoutbg.com](mailto:contact@withoutbg.com)
-- **Security:** [security@withoutbg.com](mailto:security@withoutbg.com) — see [SECURITY.md](SECURITY.md)
+- **Security:** [contact@withoutbg.com](mailto:contact@withoutbg.com) — see [SECURITY.md](SECURITY.md)

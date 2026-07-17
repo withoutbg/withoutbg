@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## Unreleased
+
+### Features
+
+* Support open-weights model **v10.0.0** (unified ONNX; 448×448 canvas)
+
+### Bug Fixes
+
+* Default letterbox canvas to 448 when sidecar metadata is missing
+
 ## [1.0.6](https://github.com/withoutbg/withoutbg/compare/v1.0.5...v1.0.6) (2026-07-02)
 
 ### Bug Fixes

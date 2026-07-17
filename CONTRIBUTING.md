@@ -135,7 +135,7 @@ For Docker / self-hosted inference issues, open an issue in [withoutbg-inference
 
 ## Security issues
 
-Do not create public issues for security vulnerabilities. Email [security@withoutbg.com](mailto:security@withoutbg.com) instead.
+Do not create public issues for security vulnerabilities. Email [contact@withoutbg.com](mailto:contact@withoutbg.com) instead.
 
 ## License
 

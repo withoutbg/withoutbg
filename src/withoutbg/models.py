@@ -102,6 +102,9 @@ class OpenWeightsModel:
             sidecar JSON are downloaded from Hugging Face on first use if not
             provided. Inference runs lazily on first use via remove_background()
             or preload().
+
+            Canvas size comes from the sidecar; defaults assume equal
+            448×448 input/output.
         """
         self._model_path_override = model_path
         self.model_path: Optional[Path] = None
@@ -229,7 +232,7 @@ class OpenWeightsModel:
             Tuple of (rgb_tensor, new_w, new_h) where new_w/new_h are the
             resized image dimensions before padding.
         """
-        canvas = int(self.sidecar.get("canvas_size", 1024))
+        canvas = int(self.sidecar.get("canvas_size", 448))
         orig_w, orig_h = image.size
         scale = canvas / max(orig_w, orig_h)
         new_w = max(1, round(orig_w * scale))
@@ -253,10 +256,12 @@ class OpenWeightsModel:
         orig_h: int,
     ) -> Image.Image:
         """Crop and resize alpha output to original image dimensions."""
-        canvas = int(self.sidecar.get("canvas_size", 1024))
-        output_shape = self.sidecar.get("output_shape", [1, 1, 768, 768])
+        canvas = int(self.sidecar.get("canvas_size", 448))
+        output_shape = self.sidecar.get("output_shape", [1, 1, canvas, canvas])
         output_canvas = int(self.sidecar.get("output_canvas_size", output_shape[2]))
 
+        # v10: input and output canvas are equal (448), so this scale is 1.0.
+        # Kept for back-compat with older sidecars where output was smaller.
         crop_h = max(1, round(new_h * output_canvas / canvas))
         crop_w = max(1, round(new_w * output_canvas / canvas))
         alpha_crop = alpha_canvas[:crop_h, :crop_w]

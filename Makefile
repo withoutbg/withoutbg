@@ -125,7 +125,7 @@ ci: dev-install quality test-coverage
 # Documentation
 docs:
 	@echo "See README.md and the docs/ directory for documentation."
-	@echo "Online: https://withoutbg.com/documentation/integrations/python-sdk"
+	@echo "Online: https://withoutbg.com/docs/open-model/python"
 
 # Performance benchmarking
 benchmark:

@@ -12,10 +12,10 @@ from withoutbg.models import OpenWeightsModel
 
 FAKE_MODEL_PATH = "/fake/withoutbg-open-weights.onnx"
 DEFAULT_SIDECAR = {
-    "canvas_size": 1024,
-    "output_canvas_size": 768,
-    "output_shape": [1, 1, 768, 768],
+    "canvas_size": 448,
+    "output_shape": [1, 1, 448, 448],
     "input_name": "rgb",
+    "model_version": "10.0.0",
 }
 
 
@@ -61,7 +61,7 @@ class TestLazyModelLoading:
         self, mock_load_sidecar, mock_session, mock_model_path
     ):
         mock_session.return_value = _make_mock_session(
-            np.full((1, 1, 768, 768), 0.8, dtype=np.float32)
+            np.full((1, 1, 448, 448), 0.8, dtype=np.float32)
         )
         model = OpenWeightsModel(model_path=mock_model_path)
 
@@ -83,7 +83,7 @@ class TestLazyModelLoading:
         sidecar_path.write_text(json.dumps(DEFAULT_SIDECAR))
 
         mock_session.return_value = _make_mock_session(
-            np.full((1, 1, 768, 768), 0.8, dtype=np.float32)
+            np.full((1, 1, 448, 448), 0.8, dtype=np.float32)
         )
         model = OpenWeightsModel(model_path=model_path)
 
@@ -107,7 +107,7 @@ class TestInferencePipeline:
 
         rgb, new_w, new_h = model._letterbox_image(sample_rgb_image)
 
-        assert rgb.shape == (1, 3, 1024, 1024)
+        assert rgb.shape == (1, 3, 448, 448)
         assert rgb.dtype == np.float32
         assert 0.0 <= rgb.min() <= rgb.max() <= 1.0
         assert new_w > 0 and new_h > 0
@@ -118,10 +118,11 @@ class TestInferencePipeline:
     ):
         model = OpenWeightsModel(model_path=mock_model_path)
         _make_model_sidecar(model)
-        alpha_canvas = np.full((768, 768), 0.75, dtype=np.float32)
+        alpha_canvas = np.full((448, 448), 0.75, dtype=np.float32)
 
+        # 256x192 letterboxed onto 448 → new_w=448, new_h=336
         alpha = model._postprocess_alpha(
-            alpha_canvas, new_w=768, new_h=576, orig_w=256, orig_h=192
+            alpha_canvas, new_w=448, new_h=336, orig_w=256, orig_h=192
         )
 
         assert alpha.mode == "L"
@@ -132,7 +133,7 @@ class TestInferencePipeline:
         self, mock_session, mock_model_path, sample_rgb_image
     ):
         mock_session.return_value = _make_mock_session(
-            np.full((1, 1, 768, 768), 0.8, dtype=np.float32)
+            np.full((1, 1, 448, 448), 0.8, dtype=np.float32)
         )
         model = OpenWeightsModel(model_path=mock_model_path)
         _make_model_sidecar(model)
@@ -179,5 +180,5 @@ class TestInferencePipeline:
         model.model_path = model_path
         model._load_sidecar()
 
-        assert model.sidecar["canvas_size"] == 1024
+        assert model.sidecar["canvas_size"] == 448
         mock_download.assert_not_called()

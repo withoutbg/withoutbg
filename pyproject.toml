@@ -64,7 +64,7 @@ dev = [
 [project.urls]
 Homepage = "https://withoutbg.com"
 Repository = "https://github.com/withoutbg/withoutbg"
-Documentation = "https://withoutbg.com/documentation/integrations/python-sdk"
+Documentation = "https://withoutbg.com/docs/open-model/python"
 "Bug Reports" = "https://github.com/withoutbg/withoutbg/issues"
 Changelog = "https://github.com/withoutbg/withoutbg/blob/main/CHANGELOG.md"
 "Docker / Self-Hosted" = "https://github.com/withoutbg/withoutbg-inference"
