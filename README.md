@@ -1,6 +1,6 @@
 # withoutbg
 
-![AlphaMate reveal — background removal in action](docs/alphamate_reveal.webp)
+![AlphaMate reveal — background removal in action](docs/revealed.webp)
 
 **One clean alpha. Zero hassle. Drop the background in three lines of Python.**
 
