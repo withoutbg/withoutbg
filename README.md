@@ -1,10 +1,16 @@
 # withoutbg
 
-**Remove backgrounds in Python. Free locally, or use the cloud API.**
+<video src="docs/alphamate_reveal.mp4" width="720" autoplay loop muted playsinline>
+  <a href="docs/alphamate_reveal.mp4">AlphaMate reveal — background removal in action</a>
+</video>
+
+**One clean alpha. Zero hassle. Drop the background in three lines of Python.**
 
 [![PyPI](https://img.shields.io/pypi/v/withoutbg.svg)](https://pypi.org/project/withoutbg/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CI](https://github.com/withoutbg/withoutbg/actions/workflows/ci.yml/badge.svg)](https://github.com/withoutbg/withoutbg/actions/workflows/ci.yml)
+
+**Remove backgrounds in Python. Free locally, or use the cloud API.**
 
 Two modes that share the same API — run the open-weights model locally (free, private, offline) or call the cloud API (better quality, no GPU, pay per image). Switch with one line of code.
 
