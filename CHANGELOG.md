@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/withoutbg/withoutbg-python/compare/v1.1.0...v1.1.1) (2026-07-19)
+
+### Bug Fixes
+
+* **ci:** upgrade setuptools before pip-audit ([c081cae](https://github.com/withoutbg/withoutbg-python/commit/c081caed022eca08b1c2e44d31667d15dda292dd))
+
+### Documentation
+
+* lead README with AlphaMate reveal video ([55ecde1](https://github.com/withoutbg/withoutbg-python/commit/55ecde1d5a4d46295e9f324665f553218325396c))
+
 ## [1.1.0](https://github.com/withoutbg/withoutbg-python/compare/v1.0.6...v1.1.0) (2026-07-17)
 
 ### Features
