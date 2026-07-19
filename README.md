@@ -119,9 +119,8 @@ withoutbg --help
 **[See Cloud API results →](https://withoutbg.com/pro-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
 ![Example 1](sample-results/open-weights/example1.png)
-![Example 5](sample-results/open-weights/example5.png)
+![Example 2](sample-results/open-weights/example2.png)
 ![Example 3](sample-results/open-weights/example3.png)
-![Example 6](sample-results/open-weights/example6.png)
 
 ## What gets returned
 
