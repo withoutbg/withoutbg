@@ -2,25 +2,25 @@
 
 ![AlphaMate reveal — background removal in action](docs/revealed.webp)
 
-**One clean alpha. Zero hassle. Drop the background in three lines of Python.**
+**Remove backgrounds in Python. Free locally. One line to switch to the Cloud API.**
 
 [![PyPI](https://img.shields.io/pypi/v/withoutbg.svg)](https://pypi.org/project/withoutbg/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CI](https://github.com/withoutbg/withoutbg/actions/workflows/ci.yml/badge.svg)](https://github.com/withoutbg/withoutbg/actions/workflows/ci.yml)
 
-**Remove backgrounds in Python. Free locally, or use the cloud API.**
+Same API for both paths: run open weights on your machine (private, offline, unlimited) or call the Cloud API (sharper edges on hair and fur, no local GPU). Built for scripts, notebooks, backends, and batch jobs.
 
-Two modes that share the same API — run the open-weights model locally (free, private, offline) or call the cloud API (better quality, no GPU, pay per image). Switch with one line of code.
+**[Full documentation →](https://withoutbg.com/docs/open-model/python?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
-**[View Documentation →](https://withoutbg.com/docs/open-model/python?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
+## See the results
 
-## Try it
+![Example 1](sample-results/open-weights/example1.png)
+![Example 2](sample-results/open-weights/example2.png)
+![Example 3](sample-results/open-weights/example3.png)
 
-![Python Package Intro](images/python-package-intro.png)
+**[Open Weights results →](https://withoutbg.com/open-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** · **[Cloud API results →](https://withoutbg.com/pro-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)** · **[Compare →](https://withoutbg.com/compare/withoutbg-open-model-vs-pro-model?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
 
-```bash
-pip install withoutbg
-```
+## Three lines of Python
 
 ```python
 from withoutbg import WithoutBG
@@ -29,39 +29,31 @@ model = WithoutBG.open_weights()
 model.remove_background("photo.jpg").save("result.png")
 ```
 
-## Choose your mode
+Returns a PIL `Image` in RGBA. Prefer PNG or WebP — JPEG drops transparency silently.
 
-| | Local (`open_weights()`) | Cloud (`api()`) |
-|---|---|---|
-| Cost | Free forever | Pay per image |
-| Quality | Good | Better (esp. hair, fur) |
-| Privacy | Stays on your machine | Image sent to API |
-| GPU required | No (CPU ONNX) | No |
-| First-run setup | ~455MB download, once | API key only |
-| Best for | Offline, private, batch jobs | Products, occasional use |
+## Install
 
-**[Compare results →](https://withoutbg.com/compare/withoutbg-open-model-vs-pro-model?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
-
+```bash
+uv add withoutbg
 ```
-Need offline or private processing?   → Local
-Processing a large batch?             → Local (pay the setup cost once, amortize across all images)
-Building a product?                   → Cloud (better quality, zero infra overhead)
-Occasional use, no setup tolerance?   → Cloud
-```
+
+Don't have [uv](https://astral.sh/uv) yet? It's a fast Python package manager from Astral. Install it once, then the command above.
 
 ## Quick start
 
-**Local (withoutBG Open Weights Model):**
+**Local (Open Weights — free, private, offline):**
 
 ```python
 from withoutbg import WithoutBG
 
 model = WithoutBG.open_weights()
-result = model.remove_background("input.jpg")  # returns PIL Image (RGBA)
+result = model.remove_background("input.jpg")
 result.save("output.png")
 ```
 
-**Cloud (withoutBG API):**
+First local run downloads ~455 MB of weights from Hugging Face (once). After that, everything stays on your machine.
+
+**Cloud (withoutBG API — best quality):**
 
 ```python
 from withoutbg import WithoutBG
@@ -72,16 +64,18 @@ result = model.remove_background("input.jpg")
 result.save("output.png")
 ```
 
-**Batch processing:**
+**Batch (load once, process many):**
 
 ```python
 from withoutbg import WithoutBG
 
-model = WithoutBG.open_weights()  # load once
+model = WithoutBG.open_weights()  # keep this object alive
 
 images = ["photo1.jpg", "photo2.jpg", "photo3.jpg"]
 results = model.remove_background_batch(images, output_dir="results/")
 ```
+
+Recreating the model for every image reloads the weights each time — don't do that in a loop.
 
 **Progress callback:**
 
@@ -92,85 +86,88 @@ def on_progress(value: float) -> None:
 result = model.remove_background("photo.jpg", progress_callback=on_progress)
 ```
 
-See [`examples/`](examples/) for runnable scripts.
+Runnable scripts live in [`examples/`](examples/).
+
+## Choose your mode
+
+| | Local (`open_weights()`) | Cloud (`api()`) |
+|---|---|---|
+| Cost | Free forever | Pay per image |
+| Quality | Good | Better (esp. hair, fur) |
+| Privacy | Stays on your machine | Image sent to API |
+| GPU required | No (CPU ONNX) | No |
+| First-run setup | ~455 MB download, once | API key only |
+| Best for | Offline, private, batch jobs | Products, occasional use |
+
+```
+Need offline or private processing?   → Local
+Processing a large batch?             → Local (pay setup once, amortize across images)
+Building a product?                   → Cloud (better quality, zero infra)
+Occasional use, no setup tolerance?   → Cloud
+```
 
 ## CLI
 
 ```bash
 # Single image (local model)
 withoutbg photo.jpg
+withoutbg photo.jpg --output result.png
 
-# Batch
+# Batch a directory
 withoutbg ~/Photos/vacation/ --batch --output-dir ~/Photos/no-bg/
 
 # Cloud API
 export WITHOUTBG_API_KEY=sk_your_key
 withoutbg photo.jpg --use-api
 
-# JPEG output with white background fill
+# JPEG with white background fill
 withoutbg portrait.jpg --format jpg --quality 95
 
 withoutbg --help
 ```
 
-## Example outputs
-
-**[See Local model results →](https://withoutbg.com/open-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
-**[See Cloud API results →](https://withoutbg.com/pro-model/results?utm_source=github&utm_medium=withoutbg-readme&utm_campaign=main-readme)**
-
-![Example 1](sample-results/open-weights/example1.png)
-![Example 2](sample-results/open-weights/example2.png)
-![Example 3](sample-results/open-weights/example3.png)
-
-## What gets returned
+## What you get
 
 All methods return a PIL `Image` in RGBA mode:
 
 ```python
-result = model.remove_background("photo.jpg")  # PIL Image, RGBA
+result = model.remove_background("photo.jpg")
 
-result.save("output.png")   # PNG — preserves transparency
-result.save("output.webp")  # WebP — also supports transparency
-result.save("output.jpg")   # JPEG — transparency is dropped silently
+result.save("output.png")   # keeps transparency
+result.save("output.webp")  # keeps transparency
+result.save("output.jpg")   # transparency dropped silently
+```
+
+Compositing example:
+
+```python
+from PIL import Image
+from withoutbg import WithoutBG
+
+model = WithoutBG.open_weights()
+fg = model.remove_background("subject.jpg")
+bg = Image.open("background.jpg")
+bg.paste(fg, (0, 0), fg)  # alpha used as mask
+bg.save("composite.png")
 ```
 
 ## Configuration
 
 | Environment variable | Effect |
 |---|---|
-| `WITHOUTBG_API_KEY` | API key for Cloud mode (alternative to passing `api_key=`) |
+| `WITHOUTBG_API_KEY` | API key for Cloud mode (alternative to `api_key=`) |
 | `WITHOUTBG_MODEL_PATH` | Path to a local `.onnx` file (skips Hugging Face download) |
 
-When using `WITHOUTBG_MODEL_PATH`, the sidecar metadata file (`withoutbg-open-weights.onnx.json`) must be in the same directory.
+When using `WITHOUTBG_MODEL_PATH`, keep the sidecar metadata file (`withoutbg-open-weights.onnx.json`) next to the ONNX file.
 
 ## Performance
 
 | | Local | Cloud |
 |---|---|---|
-| First run | 5–10s (~455MB download) | 1–3s |
+| First run | 5–10s (~455 MB download) | 1–3s |
 | Per image | 2–5s | 1–3s |
-| RAM | ~2GB | None |
-| Disk | 455MB (one-time cache) | None |
-
-Keep the model object alive across all images in a batch. Recreating it for every image reloads the weights each time.
-
-## Troubleshooting
-
-**Model download fails:** The weights are pulled from [Hugging Face](https://huggingface.co/withoutbg/withoutbg-openweights-onnx) on first run (~455MB). Check your connection, or set `WITHOUTBG_MODEL_PATH` to a local copy.
-
-**Out of memory:** The local model uses ~2GB of RAM. Reduce batch size or switch to Cloud mode.
-
-**Import error:**
-
-```bash
-which python
-pip list | grep withoutbg
-pip install withoutbg
-```
-
-**API key rejected:** Get a key at [withoutbg.com](https://withoutbg.com). Set `export WITHOUTBG_API_KEY=sk_your_key`.
-
-**Migrating from older API names** (`WithoutBG.opensource()`, `ProAPI`): see [docs/MIGRATION.md](docs/MIGRATION.md).
+| RAM | ~2 GB | None (client) |
+| Disk | 455 MB (one-time cache) | None |
 
 ## Error handling
 
@@ -187,15 +184,51 @@ except WithoutBGError as e:
     print(f"Processing error: {e}")
 ```
 
+## Troubleshooting
+
+**Model download fails:** Weights come from [Hugging Face](https://huggingface.co/withoutbg/withoutbg-openweights-onnx) on first local run (~455 MB). Check your connection, or set `WITHOUTBG_MODEL_PATH` to a local copy.
+
+**Out of memory:** Local mode uses ~2 GB of RAM. Process fewer images at once, or switch to Cloud.
+
+**Import error:**
+
+```bash
+which python
+uv pip list | grep withoutbg
+uv add withoutbg
+```
+
+**API key rejected:** Get a key at [withoutbg.com](https://withoutbg.com). Set `export WITHOUTBG_API_KEY=sk_your_key`.
+
+**Migrating from older names** (`WithoutBG.opensource()`, `ProAPI`): see [docs/MIGRATION.md](docs/MIGRATION.md).
+
+## More than Python
+
+This package is the **in-process** path — embed withoutBG in your Python code or CLI. Same open-weights technology powers the rest of the ecosystem; pick the surface that matches your workflow:
+
+| Surface | Choose when |
+|---|---|
+| **[Docker / self-host](https://github.com/withoutbg/withoutbg-inference)** | You want an HTTP API or browser UI on your own server (CPU or NVIDIA GPU) |
+| **[Mac app](https://withoutbg.com/mac)** | You want a native desktop cutout tool, with an optional Local API for plugins and scripts |
+| **[GIMP plugin](https://github.com/withoutbg/withoutbg-gimp)** | You edit in GIMP 3 and want a private, mask-first workflow via Mac Local API or Docker |
+| **[Hugging Face](https://huggingface.co/withoutbg/withoutbg-openweights-onnx)** · **[Space](https://huggingface.co/spaces/withoutbg/withoutbg)** | You want to try a demo or download the ONNX weights directly |
+| **[Cloud API](https://withoutbg.com/pro-model)** | You need maximum quality without running inference yourself |
+
+```bash
+# Self-host the open-weights web app (CPU)
+docker run --rm -p 8080:8080 withoutbg/withoutbg-openweights-v3-app-cpu
+```
+
 ## Model
 
-The withoutBG Open Weights Model is a unified ONNX model hosted at [withoutbg/withoutbg-openweights-onnx](https://huggingface.co/withoutbg/withoutbg-openweights-onnx). Licensed under the [withoutBG Open Model License](https://withoutbg.com/open-model/license) (Apache 2.0 for withoutBG portions; Meta DINOv3 License for DINOv3 backbone weights). Built with DINOv3.
+The withoutBG Open Weights Model is a unified ONNX graph hosted at [withoutbg/withoutbg-openweights-onnx](https://huggingface.co/withoutbg/withoutbg-openweights-onnx). Depth, segmentation, matting, and refinement run in one pass. Built with DINOv3.
+
+Licensed under the [withoutBG Open Model License](https://withoutbg.com/open-model/license) (Apache 2.0 for withoutBG portions; Meta DINOv3 License for DINOv3 backbone weights).
 
 ## Development
 
 ```bash
 uv sync --extra dev
-# or: pip install -e ".[dev]"
 
 make test-fast    # fast unit tests
 make quality      # lint + format + type check
@@ -203,16 +236,6 @@ make test         # full suite (downloads model on first run)
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
-
-## Related projects
-
-Need a browser UI or HTTP API instead of Python?
-
-[**withoutbg-inference**](https://github.com/withoutbg/withoutbg-inference) — Docker images (CPU + GPU), FastAPI inference service, and optional web UI built on the same open-weights model.
-
-```bash
-docker run --rm -p 8080:8080 withoutbg/withoutbg-openweights-v3-app-cpu
-```
 
 ## License
 
