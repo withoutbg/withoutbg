@@ -1,8 +1,6 @@
 # withoutbg
 
-<video src="https://github.com/user-attachments/assets/8fd50d46-caa5-48a7-ae58-17324636dc95" width="720" autoplay loop muted playsinline>
-  <a href="https://github.com/user-attachments/assets/8fd50d46-caa5-48a7-ae58-17324636dc95">AlphaMate reveal — background removal in action</a>
-</video>
+![AlphaMate reveal — background removal in action](docs/alphamate_reveal.webp)
 
 **One clean alpha. Zero hassle. Drop the background in three lines of Python.**
 
