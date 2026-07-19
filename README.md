@@ -1,6 +1,6 @@
 # withoutbg
 
-![AlphaMate reveal — background removal in action](docs/revealed.webp)
+![AlphaMate reveal: background removal in action](docs/revealed.webp)
 
 **Remove backgrounds in Python. Free locally. One line to switch to the Cloud API.**
 
@@ -29,7 +29,7 @@ model = WithoutBG.open_weights()
 model.remove_background("photo.jpg").save("result.png")
 ```
 
-Returns a PIL `Image` in RGBA. Prefer PNG or WebP — JPEG drops transparency silently.
+Returns a PIL `Image` in RGBA. Prefer PNG or WebP; JPEG drops transparency silently.
 
 ## Install
 
@@ -41,7 +41,7 @@ Don't have [uv](https://astral.sh/uv) yet? It's a fast Python package manager fr
 
 ## Quick start
 
-**Local (Open Weights — free, private, offline):**
+**Local (Open Weights: free, private, offline):**
 
 ```python
 from withoutbg import WithoutBG
@@ -53,7 +53,7 @@ result.save("output.png")
 
 First local run downloads ~455 MB of weights from Hugging Face (once). After that, everything stays on your machine.
 
-**Cloud (withoutBG API — best quality):**
+**Cloud (withoutBG API: best quality):**
 
 ```python
 from withoutbg import WithoutBG
@@ -75,7 +75,7 @@ images = ["photo1.jpg", "photo2.jpg", "photo3.jpg"]
 results = model.remove_background_batch(images, output_dir="results/")
 ```
 
-Recreating the model for every image reloads the weights each time — don't do that in a loop.
+Recreating the model for every image reloads the weights each time. Don't do that in a loop.
 
 **Progress callback:**
 
@@ -112,9 +112,6 @@ Occasional use, no setup tolerance?   → Cloud
 # Single image (local model)
 withoutbg photo.jpg
 withoutbg photo.jpg --output result.png
-
-# Batch a directory
-withoutbg ~/Photos/vacation/ --batch --output-dir ~/Photos/no-bg/
 
 # Cloud API
 export WITHOUTBG_API_KEY=sk_your_key
@@ -160,15 +157,6 @@ bg.save("composite.png")
 
 When using `WITHOUTBG_MODEL_PATH`, keep the sidecar metadata file (`withoutbg-open-weights.onnx.json`) next to the ONNX file.
 
-## Performance
-
-| | Local | Cloud |
-|---|---|---|
-| First run | 5–10s (~455 MB download) | 1–3s |
-| Per image | 2–5s | 1–3s |
-| RAM | ~2 GB | None (client) |
-| Disk | 455 MB (one-time cache) | None |
-
 ## Error handling
 
 ```python
@@ -188,8 +176,6 @@ except WithoutBGError as e:
 
 **Model download fails:** Weights come from [Hugging Face](https://huggingface.co/withoutbg/withoutbg-openweights-onnx) on first local run (~455 MB). Check your connection, or set `WITHOUTBG_MODEL_PATH` to a local copy.
 
-**Out of memory:** Local mode uses ~2 GB of RAM. Process fewer images at once, or switch to Cloud.
-
 **Import error:**
 
 ```bash
@@ -204,7 +190,7 @@ uv add withoutbg
 
 ## More than Python
 
-This package is the **in-process** path — embed withoutBG in your Python code or CLI. Same open-weights technology powers the rest of the ecosystem; pick the surface that matches your workflow:
+This package is the **in-process** path: embed withoutBG in your Python code or CLI. Same open-weights technology powers the rest of the ecosystem; pick the surface that matches your workflow:
 
 | Surface | Choose when |
 |---|---|
@@ -248,8 +234,8 @@ for embedded DINOv3 weights. See the
 
 ### Third-party components
 
-- **DINOv3 (Meta)**: Meta DINOv3 License — backbone weights in the Open Weights Model
-- **Depth Anything V2**: Apache 2.0
+- **DINOv3 (Meta)**: Meta DINOv3 License (backbone weights in the Open Weights Model)
+- **Depth Anything V2**: Apache 2.0 (small variant; only the small variant is permissive)
 
 See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for complete attribution.
 
@@ -257,4 +243,4 @@ See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for complete attribution.
 
 - **Bugs / questions:** [GitHub Issues](https://github.com/withoutbg/withoutbg/issues)
 - **Commercial:** [contact@withoutbg.com](mailto:contact@withoutbg.com)
-- **Security:** [contact@withoutbg.com](mailto:contact@withoutbg.com) — see [SECURITY.md](SECURITY.md)
+- **Security:** [contact@withoutbg.com](mailto:contact@withoutbg.com) (see [SECURITY.md](SECURITY.md))
