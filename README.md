@@ -1,6 +1,6 @@
 # withoutbg
 
-![AlphaMate reveal: background removal in action](docs/revealed.webp)
+![withoutBG Intro](images/python-package-intro.png)
 
 **Remove backgrounds in Python. Free locally. One line to switch to the Cloud API.**
 
