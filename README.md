@@ -1,4 +1,4 @@
-# withoutbg
+# withoutBG
 
 ![withoutBG Intro](images/python-package-intro.png)
 
